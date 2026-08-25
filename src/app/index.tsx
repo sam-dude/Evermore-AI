@@ -254,25 +254,45 @@ export default function HomeScreen() {
               campaigns, and reward-driven experiences. Action first. Reward second.
             </Text>
 
-            {/* CTA */}
-            <TouchableOpacity
-              onPress={() => openSite()}
-              activeOpacity={0.85}
-              style={{
-                alignSelf: 'flex-start',
-                backgroundColor: '#00E5FF',
-                paddingHorizontal: 24,
-                paddingVertical: 12,
-                borderRadius: 24,
-                flexDirection: 'row',
-                alignItems: 'center',
-              }}
-            >
-              <Text style={{ fontSize: 13, fontWeight: '700', color: '#0A0F1A', marginRight: 6 }}>
-                Explore Opportunities
-              </Text>
-              <ChevronRight size={16} color="#0A0F1A" strokeWidth={2.5} />
-            </TouchableOpacity>
+            {/* CTAs */}
+            <View style={{ flexDirection: 'row', gap: 10, flexWrap: 'wrap' }}>
+              <TouchableOpacity
+                onPress={() => openSite()}
+                activeOpacity={0.85}
+                style={{
+                  backgroundColor: '#00E5FF',
+                  paddingHorizontal: 20,
+                  paddingVertical: 12,
+                  borderRadius: 24,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                }}
+              >
+                <Text style={{ fontSize: 13, fontWeight: '700', color: '#0A0F1A', marginRight: 6 }}>
+                  Explore Opportunities
+                </Text>
+                <ChevronRight size={16} color="#0A0F1A" strokeWidth={2.5} />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => Linking.openURL(TELEGRAM_URL)}
+                activeOpacity={0.85}
+                style={{
+                  backgroundColor: 'transparent',
+                  borderWidth: 1.5,
+                  borderColor: '#00E5FF',
+                  paddingHorizontal: 20,
+                  paddingVertical: 12,
+                  borderRadius: 24,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                }}
+              >
+                <Text style={{ fontSize: 13, fontWeight: '700', color: '#00E5FF' }}>
+                  Join Waitlist
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* ── LOGO ORB ── */}
@@ -516,21 +536,6 @@ export default function HomeScreen() {
                 }}
               >
                 <Text style={{ fontSize: 12, fontWeight: '600', color: '#F1F5F9' }}>Telegram</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => Linking.openURL(WHATSAPP_URL)}
-                activeOpacity={0.8}
-                style={{
-                  flex: 1,
-                  backgroundColor: '#111827',
-                  borderRadius: 12,
-                  paddingVertical: 12,
-                  alignItems: 'center',
-                  borderWidth: 1,
-                  borderColor: '#1E293B',
-                }}
-              >
-                <Text style={{ fontSize: 12, fontWeight: '600', color: '#F1F5F9' }}>WhatsApp</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => Linking.openURL('mailto:customercare@evermoreinnovation.site')}
