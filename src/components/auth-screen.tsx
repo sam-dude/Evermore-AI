@@ -69,7 +69,7 @@ export function AuthScreen() {
           <View className="items-center mb-6 mt-4">
             <View className="w-20 h-20 rounded-2xl overflow-hidden mb-3 border border-evermore-border bg-evermore-surface items-center justify-center shadow-lg shadow-cyan-500/10">
               <Image
-                source={require('@/assets/images/evertap-logo.jpeg')}
+                source={require('../../assets/images/evertap-logo.jpeg')}
                 style={{ width: '100%', height: '100%' }}
                 resizeMode="cover"
               />

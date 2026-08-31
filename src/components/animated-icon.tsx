@@ -9,7 +9,7 @@ export function AnimatedIcon() {
   return (
     <View style={styles.container}>
       <Image
-        source={require('@/assets/images/evertap-logo.jpeg')}
+        source={require('../../assets/images/evertap-logo.jpeg')}
         style={styles.logo}
         resizeMode="cover"
       />

@@ -337,7 +337,7 @@ export default function HomeScreen() {
                 }}
               >
                 <Image
-                  source={require('@/assets/images/evertap-logo.jpeg')}
+                  source={require('../../assets/images/evertap-logo.jpeg')}
                   style={{ width: 140, height: 140 }}
                   resizeMode="cover"
                 />
