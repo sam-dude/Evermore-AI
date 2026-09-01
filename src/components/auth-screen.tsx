@@ -3,7 +3,7 @@ import {
   View,
   Text,
   TextInput,
-  Pressable,
+  TouchableOpacity,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -11,32 +11,43 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ShieldCheck, Sparkles, Lock, Mail, User as UserIcon, ArrowRight } from 'lucide-react-native';
-
+import * as WebBrowser from 'expo-web-browser';
+import { Lock, Mail, User as UserIcon, Phone, ArrowRight, ArrowLeft } from 'lucide-react-native';
 import { useAuth } from '@/context/auth-context';
-import { Badge } from '@/components/ui/badge';
 
-export function AuthScreen() {
-  const { login, signup, loginAsReviewer } = useAuth();
-  const [isSignUp, setIsSignUp] = useState(false);
+interface AuthScreenProps {
+  initialMode?: 'signin' | 'signup';
+  onBackToOnboarding?: () => void;
+}
+
+export function AuthScreen({ initialMode = 'signup', onBackToOnboarding }: AuthScreenProps) {
+  const { login, signup } = useAuth();
+  const [isSignUp, setIsSignUp] = useState(initialMode === 'signup');
+  const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleAuth = async () => {
-    if (!email || !password) {
-      setError('Please fill in both email and password.');
+    if (!email.trim() || !password.trim()) {
+      setError('Please enter both your email and password.');
       return;
     }
+
+    if (isSignUp && !fullName.trim()) {
+      setError('Please enter your full name.');
+      return;
+    }
+
     setError(null);
     setLoading(true);
 
     try {
       if (isSignUp) {
-        const res = await signup(name, email, password);
-        if (!res.success) setError(res.error || 'Failed to sign up.');
+        const res = await signup(fullName, email, password, phone);
+        if (!res.success) setError(res.error || 'Failed to create account.');
       } else {
         const res = await login(email, password);
         if (!res.success) setError(res.error || 'Failed to sign in.');
@@ -46,28 +57,39 @@ export function AuthScreen() {
     }
   };
 
-  const handleReviewerQuickLogin = async () => {
-    setLoading(true);
+  const openLegal = async (url: string) => {
     try {
-      await loginAsReviewer();
-    } finally {
-      setLoading(false);
-    }
+      await WebBrowser.openBrowserAsync(url, {
+        toolbarColor: '#090D16',
+      });
+    } catch {}
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-evermore-bg">
+    <SafeAreaView className="flex-1 bg-[#090D16]">
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         className="flex-1"
       >
         <ScrollView
-          contentContainerStyle={{ paddingHorizontal: 22, paddingVertical: 20 }}
+          contentContainerStyle={{ paddingHorizontal: 24, paddingVertical: 16 }}
           showsVerticalScrollIndicator={false}
         >
-          {/* Brand Header */}
-          <View className="items-center mb-6 mt-4">
-            <View className="w-20 h-20 rounded-2xl overflow-hidden mb-3 border border-evermore-border bg-evermore-surface items-center justify-center shadow-lg shadow-cyan-500/10">
+          {/* Top Bar Navigation */}
+          {onBackToOnboarding && (
+            <TouchableOpacity
+              onPress={onBackToOnboarding}
+              activeOpacity={0.7}
+              className="flex-row items-center py-2 mb-3 -ml-1 self-start"
+            >
+              <ArrowLeft size={16} color="#94A3B8" />
+              <Text className="text-xs font-semibold text-slate-400 ml-1.5">Back</Text>
+            </TouchableOpacity>
+          )}
+
+          {/* Header */}
+          <View className="items-center mb-6 mt-2">
+            <View className="w-16 h-16 rounded-2xl overflow-hidden mb-3 border border-slate-700/80 bg-slate-900 items-center justify-center shadow-md">
               <Image
                 source={require('../../assets/images/evertap-logo.jpeg')}
                 style={{ width: '100%', height: '100%' }}
@@ -75,26 +97,23 @@ export function AuthScreen() {
               />
             </View>
 
-            <Text className="text-3xl font-extrabold tracking-tight text-white">
-              EVER<Text className="text-evermore-cyan">MORE</Text> <Text className="text-2xl font-bold text-evermore-cyan">AI</Text>
+            <Text className="text-2xl font-black text-white tracking-tight">
+              EVER<Text className="text-sky-400">MORE</Text>
             </Text>
-            <Text className="text-xs uppercase tracking-widest text-evermore-muted font-semibold mt-1">
-              Tap · Mine · Earn
-            </Text>
-            <Text className="text-xs text-slate-400 mt-1 text-center">
-              Powered by Evermore Innovation
+            <Text className="text-xs text-slate-400 mt-1">
+              Digital Skills & Opportunity Platform
             </Text>
           </View>
 
-          {/* Form Card */}
-          <View className="bg-evermore-surface border border-evermore-border rounded-3xl p-6 shadow-xl mb-5">
-            <Text className="text-xl font-bold text-white mb-1">
+          {/* Clean Card Form */}
+          <View className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl mb-6">
+            <Text className="text-xl font-black text-white mb-1">
               {isSignUp ? 'Create Your Account' : 'Welcome Back'}
             </Text>
-            <Text className="text-xs text-evermore-muted mb-5">
+            <Text className="text-xs text-slate-400 mb-5 leading-relaxed">
               {isSignUp
-                ? 'Sign up to start mining Evercoin and earning rewards'
-                : 'Sign in to manage your mined Evercoins and predictions'}
+                ? 'Join thousands of members mastering in-demand digital skills.'
+                : 'Sign in to access your curriculum, streaks, and account details.'}
             </Text>
 
             {error ? (
@@ -103,31 +122,32 @@ export function AuthScreen() {
               </View>
             ) : null}
 
-            {/* Name field for sign up */}
+            {/* Name */}
             {isSignUp && (
-              <View className="mb-4">
+              <View className="mb-3.5">
                 <Text className="text-xs font-semibold text-slate-300 mb-1.5 ml-1">Full Name</Text>
-                <View className="flex-row items-center bg-evermore-surfaceLight border border-evermore-border rounded-xl px-3.5 py-3">
-                  <UserIcon size={18} color="#94A3B8" />
+                <View className="flex-row items-center bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-3">
+                  <UserIcon size={17} color="#64748B" />
                   <TextInput
                     placeholder="e.g. Alex Johnson"
-                    placeholderTextColor="#64748B"
-                    value={name}
-                    onChangeText={setName}
+                    placeholderTextColor="#475569"
+                    value={fullName}
+                    onChangeText={setFullName}
+                    autoCapitalize="words"
                     className="flex-1 ml-2.5 text-sm text-white"
                   />
                 </View>
               </View>
             )}
 
-            {/* Email Field */}
-            <View className="mb-4">
+            {/* Email */}
+            <View className="mb-3.5">
               <Text className="text-xs font-semibold text-slate-300 mb-1.5 ml-1">Email Address</Text>
-              <View className="flex-row items-center bg-evermore-surfaceLight border border-evermore-border rounded-xl px-3.5 py-3">
-                <Mail size={18} color="#94A3B8" />
+              <View className="flex-row items-center bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-3">
+                <Mail size={17} color="#64748B" />
                 <TextInput
                   placeholder="name@example.com"
-                  placeholderTextColor="#64748B"
+                  placeholderTextColor="#475569"
                   value={email}
                   onChangeText={setEmail}
                   autoCapitalize="none"
@@ -137,14 +157,34 @@ export function AuthScreen() {
               </View>
             </View>
 
-            {/* Password Field */}
-            <View className="mb-6">
+            {/* Phone (optional) */}
+            {isSignUp && (
+              <View className="mb-3.5">
+                <Text className="text-xs font-semibold text-slate-300 mb-1.5 ml-1">
+                  Phone Number <Text className="text-slate-500 font-normal">(Optional)</Text>
+                </Text>
+                <View className="flex-row items-center bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-3">
+                  <Phone size={17} color="#64748B" />
+                  <TextInput
+                    placeholder="+234 800 000 0000"
+                    placeholderTextColor="#475569"
+                    value={phone}
+                    onChangeText={setPhone}
+                    keyboardType="phone-pad"
+                    className="flex-1 ml-2.5 text-sm text-white"
+                  />
+                </View>
+              </View>
+            )}
+
+            {/* Password */}
+            <View className="mb-5">
               <Text className="text-xs font-semibold text-slate-300 mb-1.5 ml-1">Password</Text>
-              <View className="flex-row items-center bg-evermore-surfaceLight border border-evermore-border rounded-xl px-3.5 py-3">
-                <Lock size={18} color="#94A3B8" />
+              <View className="flex-row items-center bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-3">
+                <Lock size={17} color="#64748B" />
                 <TextInput
                   placeholder="••••••••"
-                  placeholderTextColor="#64748B"
+                  placeholderTextColor="#475569"
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry
@@ -153,66 +193,51 @@ export function AuthScreen() {
               </View>
             </View>
 
-            {/* Submit Button */}
-            <Pressable
+            {/* Primary Action Button */}
+            <TouchableOpacity
               onPress={handleAuth}
               disabled={loading}
-              className="bg-evermore-cyan active:opacity-90 py-3.5 rounded-xl items-center justify-center flex-row shadow-lg shadow-cyan-500/20"
+              activeOpacity={0.85}
+              className="bg-sky-400 active:bg-sky-300 py-3.5 rounded-xl items-center justify-center flex-row shadow-lg shadow-sky-500/20"
             >
               {loading ? (
-                <ActivityIndicator size="small" color="#050B14" />
+                <ActivityIndicator size="small" color="#020617" />
               ) : (
                 <>
-                  <Text className="font-bold text-slate-950 text-sm mr-2">
-                    {isSignUp ? 'Get Started & Mine' : 'Sign In'}
+                  <Text className="font-extrabold text-slate-950 text-sm mr-2">
+                    {isSignUp ? 'Create Free Account' : 'Sign In'}
                   </Text>
-                  <ArrowRight size={16} color="#050B14" />
+                  <ArrowRight size={16} color="#020617" strokeWidth={2.5} />
                 </>
               )}
-            </Pressable>
+            </TouchableOpacity>
 
-            {/* Toggle Sign Up / Sign In */}
-            <Pressable
+            {/* Switch Mode Toggle */}
+            <TouchableOpacity
               onPress={() => {
                 setIsSignUp(!isSignUp);
                 setError(null);
               }}
-              className="mt-4 items-center"
+              className="mt-4 items-center py-1"
             >
               <Text className="text-xs text-slate-400">
                 {isSignUp ? 'Already have an account? ' : "Don't have an account? "}
-                <Text className="text-evermore-cyan font-semibold">
-                  {isSignUp ? 'Sign In' : 'Sign Up'}
+                <Text className="text-sky-400 font-bold">
+                  {isSignUp ? 'Sign In' : 'Sign Up Free'}
                 </Text>
               </Text>
-            </Pressable>
+            </TouchableOpacity>
           </View>
 
-          {/* Dedicated Google Play Reviewer Access Box */}
-          <View className="bg-slate-900/80 border border-indigo-500/40 rounded-2xl p-4 shadow-sm">
-            <View className="flex-row items-center justify-between mb-2">
-              <View className="flex-row items-center space-x-2">
-                <ShieldCheck size={18} color="#818CF8" />
-                <Text className="text-xs font-bold uppercase tracking-wider text-indigo-300">
-                  Google Play Reviewer Access
-                </Text>
-              </View>
-              <Badge label="Review Ready" variant="purple" />
-            </View>
-
-            <Text className="text-xs text-slate-400 mb-3 leading-relaxed">
-              Google review team can use the button below for instant, one-tap authenticated access to all features.
-            </Text>
-
-            <Pressable
-              onPress={handleReviewerQuickLogin}
-              className="bg-indigo-600 active:bg-indigo-700 py-3 rounded-xl items-center flex-row justify-center space-x-2 border border-indigo-400/30"
-            >
-              <Sparkles size={16} color="#ffffff" />
-              <Text className="text-xs font-bold text-white">
-                ⚡ Instant Reviewer Demo Login
-              </Text>
-            </Pressable>
+          {/* Privacy & Legal */}
+          <View className="flex-row items-center justify-center space-x-3 mt-1 mb-4">
+            <TouchableOpacity onPress={() => openLegal('https://evermoreinnovation.site/privacy.html')}>
+              <Text className="text-[11px] text-slate-400 underline">Privacy Policy</Text>
+            </TouchableOpacity>
+            <Text className="text-slate-600 text-xs">•</Text>
+            <TouchableOpacity onPress={() => openLegal('https://evermoreinnovation.site/terms.html')}>
+              <Text className="text-[11px] text-slate-400 underline">Terms of Service</Text>
+            </TouchableOpacity>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

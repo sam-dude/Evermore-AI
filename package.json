@@ -1,11 +1,12 @@
 {
   "name": "evermore-ai",
-  "description": "Evermore AI: Tap. Mine. Earn.",
+  "description": "Evermore AI: Learn. Grow. Participate.",
   "main": "expo-router/entry",
   "version": "1.0.0",
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-navigation/native": "^7.3.17",
+    "@supabase/supabase-js": "^2.112.4",
     "clsx": "^2.1.1",
     "expo": "~54.0.37",
     "expo-build-properties": "~1.0.10",
@@ -31,6 +32,7 @@
     "react-native-safe-area-context": "~5.6.0",
     "react-native-screens": "~4.16.0",
     "react-native-svg": "15.12.1",
+    "react-native-url-polyfill": "^4.0.0",
     "react-native-web": "~0.21.0",
     "react-native-worklets": "0.5.1",
     "tailwind-merge": "^3.6.0"
