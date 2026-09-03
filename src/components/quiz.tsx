@@ -45,47 +45,70 @@ export function Quiz({ questions, onComplete, pointsReward }: QuizProps) {
   };
 
   return (
-    <View className="mt-6 pt-6 border-t border-slate-800">
-      <View className="flex-row items-center justify-between mb-4">
-        <Text className="text-lg font-extrabold text-white">Lesson Quiz</Text>
-        <View className="bg-cyan-500/10 border border-cyan-500/30 px-3 py-1 rounded-full">
-          <Text className="text-xs font-bold text-evermore-cyan">Earn +{pointsReward} pts</Text>
+    <View style={{ marginTop: 24, paddingTop: 24, borderTopWidth: 1, borderTopColor: '#1E293B' }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+        <Text style={{ fontSize: 18, fontWeight: '800', color: '#FFFFFF' }}>Lesson Quiz</Text>
+        <View
+          style={{
+            backgroundColor: 'rgba(0, 229, 255, 0.1)',
+            borderWidth: 1,
+            borderColor: 'rgba(0, 229, 255, 0.3)',
+            paddingHorizontal: 12,
+            paddingVertical: 4,
+            borderRadius: 999,
+          }}
+        >
+          <Text style={{ fontSize: 12, fontWeight: '700', color: '#00E5FF' }}>Earn +{pointsReward} pts</Text>
         </View>
       </View>
 
-      <Text className="text-xs text-slate-400 mb-5">
+      <Text style={{ fontSize: 12, color: '#94A3B8', marginBottom: 20, lineHeight: 18 }}>
         Answer all questions below to verify your learning and claim your completion points.
       </Text>
 
       {questions.map((question, qIdx) => {
         const selectedOpt = selectedAnswers[qIdx];
-        const isAnswered = selectedOpt !== undefined;
 
         return (
-          <View key={qIdx} className="bg-evermore-surface border border-evermore-border rounded-2xl p-4 mb-4">
-            <Text className="text-sm font-bold text-white mb-3">
+          <View
+            key={qIdx}
+            style={{
+              backgroundColor: '#0A1628',
+              borderWidth: 1,
+              borderColor: '#1E3A5F',
+              borderRadius: 16,
+              padding: 16,
+              marginBottom: 16,
+            }}
+          >
+            <Text style={{ fontSize: 14, fontWeight: '700', color: '#FFFFFF', marginBottom: 12, lineHeight: 20 }}>
               {qIdx + 1}. {question.question}
             </Text>
 
-            <View className="space-y-2">
+            <View>
               {question.options.map((option, oIdx) => {
                 const isOptionSelected = selectedOpt === oIdx;
                 const isCorrect = question.correctIndex === oIdx;
 
-                let optBorder = 'border-slate-800 bg-slate-900/60';
-                let textColor = 'text-slate-300';
+                // Native style calculation
+                let borderColor = '#1E293B';
+                let backgroundColor = 'rgba(15, 23, 42, 0.6)';
+                let textColor = '#CBD5E1';
 
                 if (isSubmitted) {
                   if (isCorrect) {
-                    optBorder = 'border-emerald-500/60 bg-emerald-500/10';
-                    textColor = 'text-emerald-300';
+                    borderColor = 'rgba(52, 211, 153, 0.6)';
+                    backgroundColor = 'rgba(52, 211, 153, 0.12)';
+                    textColor = '#6EE7B7';
                   } else if (isOptionSelected && !isCorrect) {
-                    optBorder = 'border-rose-500/60 bg-rose-500/10';
-                    textColor = 'text-rose-300';
+                    borderColor = 'rgba(244, 63, 94, 0.6)';
+                    backgroundColor = 'rgba(244, 63, 94, 0.12)';
+                    textColor = '#FDA4AF';
                   }
                 } else if (isOptionSelected) {
-                  optBorder = 'border-evermore-cyan bg-cyan-500/10';
-                  textColor = 'text-white';
+                  borderColor = '#00E5FF';
+                  backgroundColor = 'rgba(0, 229, 255, 0.12)';
+                  textColor = '#FFFFFF';
                 }
 
                 return (
@@ -94,9 +117,27 @@ export function Quiz({ questions, onComplete, pointsReward }: QuizProps) {
                     disabled={isSubmitted}
                     onPress={() => handleSelect(qIdx, oIdx)}
                     activeOpacity={0.7}
-                    className={`flex-row items-center justify-between p-3 rounded-xl border mb-2 ${optBorder}`}
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: 13,
+                      borderRadius: 14,
+                      borderWidth: 1.5,
+                      borderColor,
+                      backgroundColor,
+                      marginBottom: 8,
+                    }}
                   >
-                    <Text className={`text-xs font-medium flex-1 pr-2 ${textColor}`}>
+                    <Text
+                      style={{
+                        fontSize: 13,
+                        fontWeight: '500',
+                        flex: 1,
+                        paddingRight: 8,
+                        color: textColor,
+                      }}
+                    >
                       {option}
                     </Text>
 
@@ -111,10 +152,23 @@ export function Quiz({ questions, onComplete, pointsReward }: QuizProps) {
       })}
 
       {isSubmitted ? (
-        <View className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-4 items-center mt-2 mb-6">
+        <View
+          style={{
+            backgroundColor: 'rgba(52, 211, 153, 0.1)',
+            borderWidth: 1,
+            borderColor: 'rgba(52, 211, 153, 0.3)',
+            borderRadius: 16,
+            padding: 16,
+            alignItems: 'center',
+            marginTop: 8,
+            marginBottom: 24,
+          }}
+        >
           <Award size={32} color="#34D399" />
-          <Text className="text-base font-bold text-white mt-2">Lesson Completed!</Text>
-          <Text className="text-xs text-slate-300 mt-1 text-center">
+          <Text style={{ fontSize: 16, fontWeight: '700', color: '#FFFFFF', marginTop: 8 }}>
+            Lesson Completed!
+          </Text>
+          <Text style={{ fontSize: 12, color: '#CBD5E1', marginTop: 4, textAlign: 'center' }}>
             You scored {calculateScore()}% and collected {pointsReward} EverPoints.
           </Text>
         </View>
@@ -123,14 +177,22 @@ export function Quiz({ questions, onComplete, pointsReward }: QuizProps) {
           onPress={handleSubmit}
           disabled={!allAnswered}
           activeOpacity={0.85}
-          className={`py-3.5 rounded-xl items-center justify-center mt-2 mb-6 ${
-            allAnswered ? 'bg-evermore-cyan shadow-lg shadow-cyan-500/20' : 'bg-slate-800'
-          }`}
+          style={{
+            backgroundColor: allAnswered ? '#00E5FF' : '#1E293B',
+            paddingVertical: 14,
+            borderRadius: 14,
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginTop: 8,
+            marginBottom: 24,
+          }}
         >
           <Text
-            className={`font-bold text-sm ${
-              allAnswered ? 'text-slate-950' : 'text-slate-500'
-            }`}
+            style={{
+              fontWeight: '800',
+              fontSize: 14,
+              color: allAnswered ? '#050B14' : '#64748B',
+            }}
           >
             {allAnswered ? 'Submit Quiz & Claim Points' : 'Select All Answers to Submit'}
           </Text>

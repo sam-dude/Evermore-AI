@@ -6,9 +6,10 @@ import {
   Dimensions,
   FlatList,
   Image,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { BookOpen, Flame, Compass, ArrowRight, CheckCircle2 } from 'lucide-react-native';
+import { BookOpen, Flame, Compass, ArrowRight, CheckCircle2, Sparkles } from 'lucide-react-native';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -21,6 +22,7 @@ const SLIDES = [
   {
     id: '1',
     icon: BookOpen,
+    iconColor: '#00E5FF',
     badge: 'Curated Knowledge',
     title: 'Learn Practical\nDigital Skills',
     description:
@@ -30,6 +32,7 @@ const SLIDES = [
   {
     id: '2',
     icon: Flame,
+    iconColor: '#F59E0B',
     badge: 'Consistency & Growth',
     title: 'Build Your Daily\nLearning Streak',
     description:
@@ -39,6 +42,7 @@ const SLIDES = [
   {
     id: '3',
     icon: Compass,
+    iconColor: '#34D399',
     badge: 'Vibrant Community',
     title: 'Unlock Verified\nOpportunities',
     description:
@@ -63,11 +67,11 @@ export function OnboardingScreen({ onFinish, onLoginPress }: OnboardingScreenPro
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#090D16]">
+    <SafeAreaView className="flex-1 bg-evermore-bg">
       {/* ── TOP BAR ── */}
       <View className="flex-row items-center justify-between px-6 pt-3 pb-2">
         <View className="flex-row items-center">
-          <View className="w-8 h-8 rounded-xl overflow-hidden mr-2.5 border border-slate-700 bg-slate-800">
+          <View className="w-9 h-9 rounded-xl overflow-hidden mr-2.5 border border-evermore-border bg-evermore-surface">
             <Image
               source={require('../../assets/images/evertap-logo.jpeg')}
               style={{ width: '100%', height: '100%' }}
@@ -75,11 +79,11 @@ export function OnboardingScreen({ onFinish, onLoginPress }: OnboardingScreenPro
             />
           </View>
           <Text className="text-base font-extrabold text-white tracking-tight">
-            EVER<Text className="text-sky-400">MORE</Text>
+            EVER<Text className="text-evermore-cyan">MORE</Text>
           </Text>
         </View>
 
-        <TouchableOpacity onPress={onFinish} activeOpacity={0.7} className="py-1 px-2.5">
+        <TouchableOpacity onPress={onFinish} activeOpacity={0.7} className="py-1.5 px-3 rounded-full bg-slate-800/50">
           <Text className="text-xs font-semibold text-slate-400">Skip</Text>
         </TouchableOpacity>
       </View>
@@ -100,14 +104,33 @@ export function OnboardingScreen({ onFinish, onLoginPress }: OnboardingScreenPro
           const IconComponent = item.icon;
           return (
             <View style={{ width: SCREEN_WIDTH }} className="px-7 justify-center flex-1 py-6">
-              {/* Graphic Card */}
-              <View className="bg-slate-900/90 border border-slate-800 rounded-3xl p-8 mb-8 shadow-2xl items-center justify-center min-h-[220px]">
-                <View className="w-20 h-20 rounded-2xl bg-sky-500/10 border border-sky-500/20 items-center justify-center mb-5">
-                  <IconComponent size={36} color="#38BDF8" strokeWidth={1.8} />
+              {/* Graphic Card with Glow */}
+              <View
+                className="bg-evermore-surface border border-evermore-border rounded-3xl p-8 mb-8 items-center justify-center min-h-[220px]"
+                style={{
+                  shadowColor: item.iconColor,
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.12,
+                  shadowRadius: 20,
+                }}
+              >
+                <View
+                  className="w-20 h-20 rounded-2xl items-center justify-center mb-5"
+                  style={{
+                    backgroundColor: `${item.iconColor}15`,
+                    borderWidth: 1,
+                    borderColor: `${item.iconColor}30`,
+                    shadowColor: item.iconColor,
+                    shadowOffset: { width: 0, height: 0 },
+                    shadowOpacity: 0.4,
+                    shadowRadius: 12,
+                  }}
+                >
+                  <IconComponent size={36} color={item.iconColor} strokeWidth={1.8} />
                 </View>
 
                 <View className="flex-row items-center bg-slate-800/80 border border-slate-700/60 px-3.5 py-1.5 rounded-full">
-                  <CheckCircle2 size={13} color="#38BDF8" />
+                  <CheckCircle2 size={13} color="#00E5FF" />
                   <Text className="text-xs font-medium text-slate-200 ml-1.5">
                     {item.highlight}
                   </Text>
@@ -116,8 +139,18 @@ export function OnboardingScreen({ onFinish, onLoginPress }: OnboardingScreenPro
 
               {/* Text Info */}
               <View className="mb-2">
-                <View className="self-start bg-sky-500/10 border border-sky-500/20 px-3 py-1 rounded-full mb-3">
-                  <Text className="text-[11px] font-bold text-sky-400 uppercase tracking-wider">
+                <View
+                  className="self-start px-3 py-1.5 rounded-full mb-3"
+                  style={{
+                    backgroundColor: `${item.iconColor}10`,
+                    borderWidth: 1,
+                    borderColor: `${item.iconColor}20`,
+                  }}
+                >
+                  <Text
+                    className="text-[11px] font-bold uppercase tracking-wider"
+                    style={{ color: item.iconColor }}
+                  >
                     {item.badge}
                   </Text>
                 </View>
@@ -138,13 +171,22 @@ export function OnboardingScreen({ onFinish, onLoginPress }: OnboardingScreenPro
       {/* ── BOTTOM CONTROLS ── */}
       <View className="px-7 pb-8 pt-2">
         {/* Pagination Dots */}
-        <View className="flex-row items-center justify-center space-x-2 mb-6">
-          {SLIDES.map((_, idx) => (
+        <View className="flex-row items-center justify-center mb-6" style={{ gap: 8 }}>
+          {SLIDES.map((slide, idx) => (
             <View
               key={idx}
-              className={`h-2 rounded-full transition-all ${
-                currentIndex === idx ? 'w-7 bg-sky-400' : 'w-2 bg-slate-700'
-              }`}
+              style={{
+                height: 8,
+                borderRadius: 4,
+                width: currentIndex === idx ? 28 : 8,
+                backgroundColor: currentIndex === idx ? '#00E5FF' : '#1E293B',
+                ...(currentIndex === idx ? {
+                  shadowColor: '#00E5FF',
+                  shadowOffset: { width: 0, height: 0 },
+                  shadowOpacity: 0.5,
+                  shadowRadius: 6,
+                } : {}),
+              }}
             />
           ))}
         </View>
@@ -153,19 +195,26 @@ export function OnboardingScreen({ onFinish, onLoginPress }: OnboardingScreenPro
         <TouchableOpacity
           onPress={handleNext}
           activeOpacity={0.85}
-          className="bg-sky-400 active:bg-sky-300 py-4 rounded-2xl flex-row items-center justify-center shadow-lg shadow-sky-500/20 mb-3.5"
+          className="py-4 rounded-2xl flex-row items-center justify-center mb-3.5"
+          style={{
+            backgroundColor: '#00E5FF',
+            shadowColor: '#00E5FF',
+            shadowOffset: { width: 0, height: 6 },
+            shadowOpacity: 0.35,
+            shadowRadius: 16,
+          }}
         >
-          <Text className="font-extrabold text-slate-950 text-sm mr-2">
+          <Text className="font-extrabold text-evermore-bg text-sm mr-2">
             {currentIndex === SLIDES.length - 1 ? 'Get Started' : 'Continue'}
           </Text>
-          <ArrowRight size={16} color="#020617" strokeWidth={2.5} />
+          <ArrowRight size={16} color="#050B14" strokeWidth={2.5} />
         </TouchableOpacity>
 
         {/* Sign In Link */}
         <TouchableOpacity onPress={onLoginPress} activeOpacity={0.7} className="items-center py-2">
           <Text className="text-xs text-slate-400">
             Already have an account?{' '}
-            <Text className="text-sky-400 font-bold">Sign In</Text>
+            <Text className="text-evermore-cyan font-bold">Sign In</Text>
           </Text>
         </TouchableOpacity>
       </View>

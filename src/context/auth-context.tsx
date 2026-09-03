@@ -34,6 +34,7 @@ interface AuthContextType {
   login: (email: string, pass: string) => Promise<{ success: boolean; error?: string }>;
   signup: (fullName: string, email: string, pass: string, phone?: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
+  deleteAccount: () => Promise<void>;
   checkIn: () => Promise<{ success: boolean; pointsEarned: number; newStreak: number; message?: string }>;
   completeLesson: (lessonId: string, score: number, pointsReward: number) => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -409,6 +410,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await AsyncStorage.removeItem(LOCAL_PROGRESS_KEY);
   };
 
+  const deleteAccount = async () => {
+    try {
+      if (isSupabaseConfigured() && user?.id) {
+        try {
+          await supabase.from('profiles').delete().eq('id', user.id);
+          await supabase.from('lessons_progress').delete().eq('user_id', user.id);
+        } catch {}
+        try {
+          await supabase.auth.signOut();
+        } catch {}
+      }
+    } catch {}
+
+    // Clean up offline mock record if present
+    if (user?.email) {
+      try {
+        const rawUsers = await AsyncStorage.getItem(LOCAL_USERS_KEY);
+        if (rawUsers) {
+          const users = JSON.parse(rawUsers);
+          delete users[user.email.toLowerCase()];
+          await AsyncStorage.setItem(LOCAL_USERS_KEY, JSON.stringify(users));
+        }
+      } catch {}
+    }
+
+    setUser(null);
+    setSubscription({ plan: 'free', status: 'active' });
+    setLessonProgress({});
+    await AsyncStorage.removeItem(LOCAL_SESSION_KEY);
+    await AsyncStorage.removeItem(LOCAL_SUB_KEY);
+    await AsyncStorage.removeItem(LOCAL_PROGRESS_KEY);
+  };
+
   const checkIn = async () => {
     if (!user) return { success: false, pointsEarned: 0, newStreak: 0, message: 'Not logged in' };
 
@@ -503,6 +537,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         login,
         signup,
         logout,
+        deleteAccount,
         checkIn,
         completeLesson,
         refreshProfile,

@@ -60,19 +60,19 @@ export function AuthScreen({ initialMode = 'signup', onBackToOnboarding }: AuthS
   const openLegal = async (url: string) => {
     try {
       await WebBrowser.openBrowserAsync(url, {
-        toolbarColor: '#090D16',
+        toolbarColor: '#050B14',
       });
     } catch {}
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#090D16]">
+    <SafeAreaView className="flex-1 bg-evermore-bg">
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         className="flex-1"
       >
         <ScrollView
-          contentContainerStyle={{ paddingHorizontal: 24, paddingVertical: 16 }}
+          contentContainerStyle={{ paddingHorizontal: 26, paddingVertical: 18 }}
           showsVerticalScrollIndicator={false}
         >
           {/* Top Bar Navigation */}
@@ -80,71 +80,78 @@ export function AuthScreen({ initialMode = 'signup', onBackToOnboarding }: AuthS
             <TouchableOpacity
               onPress={onBackToOnboarding}
               activeOpacity={0.7}
-              className="flex-row items-center py-2 mb-3 -ml-1 self-start"
+              className="flex-row items-center py-2 mb-2 -ml-1 self-start"
             >
-              <ArrowLeft size={16} color="#94A3B8" />
-              <Text className="text-xs font-semibold text-slate-400 ml-1.5">Back</Text>
+              <ArrowLeft size={20} color="#00E5FF" />
+              <Text className="text-sm font-bold text-evermore-cyan ml-2">Back</Text>
             </TouchableOpacity>
           )}
 
-          {/* Header */}
-          <View className="items-center mb-6 mt-2">
-            <View className="w-16 h-16 rounded-2xl overflow-hidden mb-3 border border-slate-700/80 bg-slate-900 items-center justify-center shadow-md">
-              <Image
-                source={require('../../assets/images/evertap-logo.jpeg')}
-                style={{ width: '100%', height: '100%' }}
-                resizeMode="cover"
-              />
+          {/* Minimal Header (No Box) */}
+          <View className="mb-8 mt-2">
+            <View className="flex-row items-center mb-5">
+              <View
+                className="w-12 h-12 rounded-2xl overflow-hidden mr-3 border border-evermore-border bg-evermore-surface items-center justify-center"
+                style={{
+                  shadowColor: '#00E5FF',
+                  shadowOffset: { width: 0, height: 0 },
+                  shadowOpacity: 0.3,
+                  shadowRadius: 10,
+                }}
+              >
+                <Image
+                  source={require('../../assets/images/evertap-logo.jpeg')}
+                  style={{ width: '100%', height: '100%' }}
+                  resizeMode="cover"
+                />
+              </View>
+              <Text className="text-xl font-black text-white tracking-tight">
+                EVER<Text className="text-evermore-cyan">MORE</Text>
+              </Text>
             </View>
 
-            <Text className="text-2xl font-black text-white tracking-tight">
-              EVER<Text className="text-sky-400">MORE</Text>
+            <Text className="text-3xl font-black text-white tracking-tight leading-tight mb-2">
+              {isSignUp ? 'Create your account' : 'Welcome back'}
             </Text>
-            <Text className="text-xs text-slate-400 mt-1">
-              Digital Skills & Opportunity Platform
+            <Text className="text-base text-slate-400 leading-relaxed">
+              {isSignUp
+                ? 'Join motivated members unlocking modern digital skills and reward-driven opportunities.'
+                : 'Sign in to access your modules, daily streaks, and membership perks.'}
             </Text>
           </View>
 
-          {/* Clean Card Form */}
-          <View className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl mb-6">
-            <Text className="text-xl font-black text-white mb-1">
-              {isSignUp ? 'Create Your Account' : 'Welcome Back'}
-            </Text>
-            <Text className="text-xs text-slate-400 mb-5 leading-relaxed">
-              {isSignUp
-                ? 'Join thousands of members mastering in-demand digital skills.'
-                : 'Sign in to access your curriculum, streaks, and account details.'}
-            </Text>
+          {/* Error Banner */}
+          {error && (
+            <View className="bg-rose-500/10 border border-rose-500/30 rounded-2xl p-4 mb-6">
+              <Text className="text-sm text-rose-400 font-semibold leading-relaxed">{error}</Text>
+            </View>
+          )}
 
-            {error ? (
-              <View className="bg-rose-500/10 border border-rose-500/30 rounded-xl p-3 mb-4">
-                <Text className="text-xs text-rose-400 font-medium">{error}</Text>
-              </View>
-            ) : null}
-
-            {/* Name */}
+          {/* Minimal Form Elements (No Container Card) */}
+          <View>
+            {/* Full Name */}
             {isSignUp && (
-              <View className="mb-3.5">
-                <Text className="text-xs font-semibold text-slate-300 mb-1.5 ml-1">Full Name</Text>
-                <View className="flex-row items-center bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-3">
-                  <UserIcon size={17} color="#64748B" />
+              <View className="mb-4">
+                <Text className="text-sm font-bold text-slate-200 mb-2 pl-1">Full Name</Text>
+                <View className="flex-row items-center bg-evermore-surface border border-slate-800 rounded-2xl px-4 py-3.5 focus:border-evermore-cyan">
+                  <UserIcon size={20} color="#64748B" />
                   <TextInput
                     placeholder="e.g. Alex Johnson"
                     placeholderTextColor="#475569"
                     value={fullName}
                     onChangeText={setFullName}
                     autoCapitalize="words"
-                    className="flex-1 ml-2.5 text-sm text-white"
+                    className="flex-1 ml-3 text-base text-white"
                   />
                 </View>
               </View>
             )}
 
             {/* Email */}
-            <View className="mb-3.5">
-              <Text className="text-xs font-semibold text-slate-300 mb-1.5 ml-1">Email Address</Text>
-              <View className="flex-row items-center bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-3">
-                <Mail size={17} color="#64748B" />
+            <View className="mb-4">
+              <Text className="text-sm font-bold text-slate-200 mb-2 pl-1">Email Address</Text>
+              <View className="flex-row items-center bg-evermore-surface border border-slate-800 rounded-2xl px-4 py-3.5 focus:border-evermore-cyan">
+                <Mail size={20} color="#64748B" />
                 <TextInput
                   placeholder="name@example.com"
                   placeholderTextColor="#475569"
@@ -152,43 +159,43 @@ export function AuthScreen({ initialMode = 'signup', onBackToOnboarding }: AuthS
                   onChangeText={setEmail}
                   autoCapitalize="none"
                   keyboardType="email-address"
-                  className="flex-1 ml-2.5 text-sm text-white"
+                  className="flex-1 ml-3 text-base text-white"
                 />
               </View>
             </View>
 
             {/* Phone (optional) */}
             {isSignUp && (
-              <View className="mb-3.5">
-                <Text className="text-xs font-semibold text-slate-300 mb-1.5 ml-1">
+              <View className="mb-4">
+                <Text className="text-sm font-bold text-slate-200 mb-2 pl-1">
                   Phone Number <Text className="text-slate-500 font-normal">(Optional)</Text>
                 </Text>
-                <View className="flex-row items-center bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-3">
-                  <Phone size={17} color="#64748B" />
+                <View className="flex-row items-center bg-evermore-surface border border-slate-800 rounded-2xl px-4 py-3.5 focus:border-evermore-cyan">
+                  <Phone size={20} color="#64748B" />
                   <TextInput
                     placeholder="+234 800 000 0000"
                     placeholderTextColor="#475569"
                     value={phone}
                     onChangeText={setPhone}
                     keyboardType="phone-pad"
-                    className="flex-1 ml-2.5 text-sm text-white"
+                    className="flex-1 ml-3 text-base text-white"
                   />
                 </View>
               </View>
             )}
 
             {/* Password */}
-            <View className="mb-5">
-              <Text className="text-xs font-semibold text-slate-300 mb-1.5 ml-1">Password</Text>
-              <View className="flex-row items-center bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-3">
-                <Lock size={17} color="#64748B" />
+            <View className="mb-6">
+              <Text className="text-sm font-bold text-slate-200 mb-2 pl-1">Password</Text>
+              <View className="flex-row items-center bg-evermore-surface border border-slate-800 rounded-2xl px-4 py-3.5 focus:border-evermore-cyan">
+                <Lock size={20} color="#64748B" />
                 <TextInput
                   placeholder="••••••••"
                   placeholderTextColor="#475569"
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry
-                  className="flex-1 ml-2.5 text-sm text-white"
+                  className="flex-1 ml-3 text-base text-white"
                 />
               </View>
             </View>
@@ -198,31 +205,38 @@ export function AuthScreen({ initialMode = 'signup', onBackToOnboarding }: AuthS
               onPress={handleAuth}
               disabled={loading}
               activeOpacity={0.85}
-              className="bg-sky-400 active:bg-sky-300 py-3.5 rounded-xl items-center justify-center flex-row shadow-lg shadow-sky-500/20"
+              className="py-4 rounded-2xl items-center justify-center flex-row mb-5"
+              style={{
+                backgroundColor: '#00E5FF',
+                shadowColor: '#00E5FF',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.35,
+                shadowRadius: 14,
+              }}
             >
               {loading ? (
-                <ActivityIndicator size="small" color="#020617" />
+                <ActivityIndicator size="small" color="#050B14" />
               ) : (
                 <>
-                  <Text className="font-extrabold text-slate-950 text-sm mr-2">
+                  <Text className="font-black text-evermore-bg text-base mr-2">
                     {isSignUp ? 'Create Free Account' : 'Sign In'}
                   </Text>
-                  <ArrowRight size={16} color="#020617" strokeWidth={2.5} />
+                  <ArrowRight size={18} color="#050B14" strokeWidth={2.5} />
                 </>
               )}
             </TouchableOpacity>
 
-            {/* Switch Mode Toggle */}
+            {/* Switch Mode Toggle (Bigger & Clean) */}
             <TouchableOpacity
               onPress={() => {
                 setIsSignUp(!isSignUp);
                 setError(null);
               }}
-              className="mt-4 items-center py-1"
+              className="items-center py-2 mb-8"
             >
-              <Text className="text-xs text-slate-400">
+              <Text className="text-sm text-slate-400">
                 {isSignUp ? 'Already have an account? ' : "Don't have an account? "}
-                <Text className="text-sky-400 font-bold">
+                <Text className="text-evermore-cyan font-bold">
                   {isSignUp ? 'Sign In' : 'Sign Up Free'}
                 </Text>
               </Text>
@@ -230,13 +244,13 @@ export function AuthScreen({ initialMode = 'signup', onBackToOnboarding }: AuthS
           </View>
 
           {/* Privacy & Legal */}
-          <View className="flex-row items-center justify-center space-x-3 mt-1 mb-4">
+          <View className="flex-row items-center justify-center pb-6" style={{ gap: 14 }}>
             <TouchableOpacity onPress={() => openLegal('https://evermoreinnovation.site/privacy.html')}>
-              <Text className="text-[11px] text-slate-400 underline">Privacy Policy</Text>
+              <Text className="text-xs text-slate-500 underline">Privacy Policy</Text>
             </TouchableOpacity>
-            <Text className="text-slate-600 text-xs">•</Text>
+            <Text className="text-slate-700 text-sm">•</Text>
             <TouchableOpacity onPress={() => openLegal('https://evermoreinnovation.site/terms.html')}>
-              <Text className="text-[11px] text-slate-400 underline">Terms of Service</Text>
+              <Text className="text-xs text-slate-500 underline">Terms of Service</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>

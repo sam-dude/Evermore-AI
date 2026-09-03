@@ -14,17 +14,20 @@ import {
   Sparkles,
   BookOpen,
   ArrowRight,
-  TrendingUp,
   ShieldCheck,
   ExternalLink,
   Bell,
+  Crown,
+  Zap,
   ChevronRight,
+  CheckCircle2,
 } from 'lucide-react-native';
 import { useAuth } from '@/context/auth-context';
 import { CheckinCard } from '@/components/checkin-card';
 import { LESSONS } from '@/data/lessons';
 
 const FLUTTERWAVE_TRIAL_URL = 'https://flutterwave.com/pay/evermoreai';
+const FLUTTERWAVE_PREMIUM_URL = 'https://flutterwave.com/pay/everaipremium';
 const WEB_DASHBOARD_URL = 'https://evermoreinnovation.site/';
 
 export default function DashboardScreen() {
@@ -35,6 +38,7 @@ export default function DashboardScreen() {
 
   const completedLessonsCount = Object.values(lessonProgress).filter((p) => p.completed).length;
   const totalLessons = LESSONS.length;
+  const progressPercent = Math.max(8, (completedLessonsCount / totalLessons) * 100);
 
   const todayStr = new Date().toISOString().split('T')[0];
   const hasCheckedInToday = user?.lastCheckin === todayStr;
@@ -54,56 +58,201 @@ export default function DashboardScreen() {
     }
   };
 
-  const handleUpgrade = async () => {
-    if (Platform.OS === 'android') {
-      try {
-        await WebBrowser.openBrowserAsync(FLUTTERWAVE_TRIAL_URL, {
-          toolbarColor: '#090D16',
-        });
-      } catch {
-        Linking.openURL(FLUTTERWAVE_TRIAL_URL);
-      }
-    } else {
-      try {
-        await WebBrowser.openBrowserAsync(WEB_DASHBOARD_URL, {
-          toolbarColor: '#090D16',
-        });
-      } catch {
-        Linking.openURL(WEB_DASHBOARD_URL);
-      }
+  const handleUpgrade = async (plan: 'basic' | 'premium' = 'basic') => {
+    // Compliant with Apple Guideline 3.1.1: never direct iOS users to raw purchase links with 'pay' in domain
+    const targetUrl = Platform.OS === 'ios'
+      ? WEB_DASHBOARD_URL
+      : (plan === 'premium' ? FLUTTERWAVE_PREMIUM_URL : FLUTTERWAVE_TRIAL_URL);
+    try {
+      await WebBrowser.openBrowserAsync(targetUrl, {
+        toolbarColor: '#050B14',
+      });
+    } catch {
+      Linking.openURL(targetUrl);
     }
   };
 
+  const handleManageWeb = async () => {
+    try {
+      await WebBrowser.openBrowserAsync(WEB_DASHBOARD_URL, {
+        toolbarColor: '#050B14',
+      });
+    } catch {
+      Linking.openURL(WEB_DASHBOARD_URL);
+    }
+  };
+
+  const isFree = subscription.plan === 'free';
+  const planName = (subscription.plan || 'free').toUpperCase();
+
   return (
-    <SafeAreaView className="flex-1 bg-[#090D16]" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-evermore-bg" edges={['top']}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 36 }}
       >
         {/* ── TOP BAR / USER GREETING ── */}
-        <View className="flex-row items-center justify-between pt-2 pb-3 mb-2">
-          <View>
-            <Text className="text-xs font-semibold text-slate-400">Welcome back,</Text>
-            <Text className="text-xl font-black text-white tracking-tight">
+        <View className="flex-row items-center justify-between pt-3 pb-3 mb-1">
+          <View className="flex-1 pr-2">
+            <Text className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest">
+              Welcome back,
+            </Text>
+            <Text className="text-2xl font-black text-white tracking-tight" numberOfLines={1}>
               {user?.fullName || 'Evermore Member'}
             </Text>
           </View>
 
-          {/* Points Pill */}
-          <View className="flex-row items-center bg-slate-900 border border-slate-800 px-3.5 py-1.5 rounded-full">
-            <Sparkles size={14} color="#38BDF8" />
-            <Text className="text-xs font-extrabold text-sky-400 ml-1.5">
-              {user?.points || 0} pts
-            </Text>
+          {/* Top Actions: Membership Badge & Points Pill */}
+          <View className="flex-row items-center" style={{ gap: 8 }}>
+            {/* Membership Pill (Tappable direct shortcut to Membership Tab, clean and compliant) */}
+            <TouchableOpacity
+              onPress={() => router.push('/(tabs)/membership' as any)}
+              activeOpacity={0.8}
+              className={`flex-row items-center px-3 py-1.5 rounded-full border ${
+                isFree
+                  ? 'bg-amber-500/10 border-amber-500/30'
+                  : 'bg-emerald-500/10 border-emerald-500/30'
+              }`}
+              style={{
+                shadowColor: isFree ? '#F59E0B' : '#10B981',
+                shadowOffset: { width: 0, height: 0 },
+                shadowOpacity: 0.25,
+                shadowRadius: 6,
+              }}
+            >
+              <Crown size={13} color={isFree ? '#F59E0B' : '#10B981'} />
+              <Text
+                className={`text-[10px] font-black uppercase ml-1.5 ${
+                  isFree ? 'text-amber-400' : 'text-emerald-400'
+                }`}
+              >
+                {isFree ? 'FREE TIER' : `${planName}`}
+              </Text>
+            </TouchableOpacity>
+
+            {/* Points Pill */}
+            <View
+              className="flex-row items-center bg-evermore-surface border border-evermore-border px-3 py-1.5 rounded-full"
+              style={{
+                shadowColor: '#00E5FF',
+                shadowOffset: { width: 0, height: 0 },
+                shadowOpacity: 0.15,
+                shadowRadius: 8,
+              }}
+            >
+              <Sparkles size={13} color="#00E5FF" />
+              <Text className="text-xs font-extrabold text-evermore-cyan ml-1.5">
+                {user?.points || 0} pts
+              </Text>
+            </View>
           </View>
         </View>
 
-        {/* Checkin Alert Banner if any */}
+        {/* Checkin Alert Banner */}
         {checkinAlert && (
-          <View className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-3.5 mb-4">
+          <View
+            className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-3.5 mb-4"
+            style={{
+              shadowColor: '#50C878',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.15,
+              shadowRadius: 8,
+            }}
+          >
             <Text className="text-xs text-emerald-300 font-semibold">{checkinAlert}</Text>
           </View>
         )}
+
+        {/* ── HERO MEMBERSHIP VIP CARD (CLEAN, NO EXPLICIT PRICES) ── */}
+        <View
+          className="bg-evermore-surface border rounded-3xl p-5 mb-5"
+          style={{
+            borderColor: isFree ? 'rgba(245, 158, 11, 0.35)' : 'rgba(0, 229, 255, 0.35)',
+            shadowColor: isFree ? '#F59E0B' : '#00E5FF',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.12,
+            shadowRadius: 18,
+          }}
+        >
+          <View className="flex-row items-center justify-between mb-3">
+            <View className="flex-row items-center">
+              <View
+                className={`w-11 h-11 rounded-2xl items-center justify-center mr-3 ${
+                  isFree ? 'bg-amber-500/15 border border-amber-500/30' : 'bg-cyan-500/15 border border-cyan-500/30'
+                }`}
+              >
+                <Crown size={22} color={isFree ? '#F59E0B' : '#00E5FF'} strokeWidth={2.2} />
+              </View>
+              <View>
+                <Text
+                  className={`text-[10px] font-black uppercase tracking-wider ${
+                    isFree ? 'text-amber-400' : 'text-evermore-cyan'
+                  }`}
+                >
+                  {isFree ? 'Access Tier' : 'VIP Active Member'}
+                </Text>
+                <Text className="text-base font-black text-white">
+                  {isFree ? 'Membership Packages' : `${planName} Member Tier`}
+                </Text>
+              </View>
+            </View>
+
+            <TouchableOpacity
+              onPress={() => router.push('/(tabs)/membership' as any)}
+              className="flex-row items-center bg-evermore-surfaceLight border border-evermore-border px-2.5 py-1 rounded-full"
+            >
+              <Text className="text-[10px] font-bold text-slate-300 mr-1">Tiers</Text>
+              <ChevronRight size={12} color="#94A3B8" />
+            </TouchableOpacity>
+          </View>
+
+          <Text className="text-xs text-slate-300 leading-relaxed mb-4">
+            {isFree
+              ? 'Access verified campaign tasks, specialized AI training tracks, and community privileges across the Evermore ecosystem.'
+              : 'Your membership is active! Enjoy premium AI modules, priority submission reviews, and official community perks.'}
+          </Text>
+
+          {isFree ? (
+            /* Dual Tier Access CTAs (No explicit currency symbols to prevent iOS review rejections) */
+            <View className="flex-row" style={{ gap: 10 }}>
+              <TouchableOpacity
+                onPress={() => handleUpgrade('basic')}
+                activeOpacity={0.8}
+                className="flex-1 bg-evermore-surfaceLight border border-evermore-border py-3 rounded-xl items-center justify-center"
+              >
+                <Text className="text-[10px] font-bold text-slate-400 uppercase">Basic Tier</Text>
+                <Text className="text-xs font-black text-evermore-cyan mt-0.5">Standard Track</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => handleUpgrade('premium')}
+                activeOpacity={0.85}
+                className="flex-1 py-3 rounded-xl items-center justify-center"
+                style={{
+                  backgroundColor: '#00E5FF',
+                  shadowColor: '#00E5FF',
+                  shadowOffset: { width: 0, height: 3 },
+                  shadowOpacity: 0.35,
+                  shadowRadius: 10,
+                }}
+              >
+                <Text className="text-[10px] font-black text-evermore-bg uppercase tracking-wide">
+                  Premium Tier
+                </Text>
+                <Text className="text-xs font-black text-evermore-bg mt-0.5">Priority Track</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <TouchableOpacity
+              onPress={handleManageWeb}
+              activeOpacity={0.8}
+              className="bg-evermore-surfaceLight border border-evermore-border py-2.5 rounded-xl flex-row items-center justify-center"
+            >
+              <Text className="text-xs font-bold text-white mr-2">Manage Account on Official Portal</Text>
+              <ExternalLink size={13} color="#00E5FF" />
+            </TouchableOpacity>
+          )}
+        </View>
 
         {/* ── DAILY CHECK-IN WIDGET ── */}
         <CheckinCard
@@ -114,29 +263,42 @@ export default function DashboardScreen() {
         />
 
         {/* ── PROGRESS SECTION ── */}
-        <View className="bg-[#121A2A] border border-[#1E2C44] rounded-3xl p-5 mb-5 shadow-lg">
+        <View
+          className="bg-evermore-surface border border-evermore-border rounded-3xl p-5 mb-5"
+          style={{
+            shadowColor: '#00E5FF',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.06,
+            shadowRadius: 16,
+          }}
+        >
           <View className="flex-row items-center justify-between mb-3">
             <View className="flex-row items-center">
-              <View className="w-10 h-10 rounded-2xl bg-sky-500/10 border border-sky-500/20 items-center justify-center mr-3">
-                <BookOpen size={20} color="#38BDF8" />
+              <View className="w-11 h-11 rounded-2xl bg-evermore-cyan/10 border border-evermore-cyan/20 items-center justify-center mr-3">
+                <BookOpen size={20} color="#00E5FF" />
               </View>
               <View>
-                <Text className="text-[11px] font-bold text-sky-400 uppercase tracking-wider">
+                <Text className="text-[11px] font-bold text-evermore-cyan uppercase tracking-wider">
                   Curriculum
                 </Text>
                 <Text className="text-base font-black text-white">
-                  {completedLessonsCount} of {totalLessons} Modules Completed
+                  {completedLessonsCount} of {totalLessons} Modules
                 </Text>
               </View>
             </View>
           </View>
 
-          {/* Native Progress Bar */}
-          <View className="w-full bg-slate-800 h-2 rounded-full overflow-hidden mb-4">
+          {/* Gradient Progress Bar */}
+          <View className="w-full bg-slate-800/80 h-2.5 rounded-full overflow-hidden mb-4">
             <View
-              className="bg-sky-400 h-full rounded-full"
+              className="h-full rounded-full"
               style={{
-                width: `${Math.max(8, (completedLessonsCount / totalLessons) * 100)}%`,
+                width: `${progressPercent}%`,
+                backgroundColor: '#00E5FF',
+                shadowColor: '#00E5FF',
+                shadowOffset: { width: 0, height: 0 },
+                shadowOpacity: 0.6,
+                shadowRadius: 6,
               }}
             />
           </View>
@@ -144,19 +306,19 @@ export default function DashboardScreen() {
           <TouchableOpacity
             onPress={() => router.push('/(tabs)/learn' as any)}
             activeOpacity={0.75}
-            className="bg-[#182338] border border-slate-700/60 py-3 px-4 rounded-xl flex-row items-center justify-between"
+            className="bg-evermore-surfaceLight border border-evermore-border py-3.5 px-4 rounded-xl flex-row items-center justify-between"
           >
             <Text className="text-xs font-bold text-white">
               {completedLessonsCount === totalLessons ? 'Review All Modules' : 'Continue Learning'}
             </Text>
-            <ArrowRight size={14} color="#38BDF8" />
+            <ArrowRight size={14} color="#00E5FF" />
           </TouchableOpacity>
         </View>
 
         {/* ── PLATFORM UPDATES ── */}
-        <View className="bg-[#121A2A] border border-[#1E2C44] rounded-3xl p-5 mb-5 shadow-lg">
-          <View className="flex-row items-center space-x-2.5 mb-3.5">
-            <View className="w-8 h-8 rounded-xl bg-indigo-500/10 border border-indigo-500/20 items-center justify-center">
+        <View className="bg-evermore-surface border border-evermore-border rounded-3xl p-5 mb-5">
+          <View className="flex-row items-center mb-3.5">
+            <View className="w-9 h-9 rounded-xl bg-indigo-500/10 border border-indigo-500/20 items-center justify-center mr-2.5">
               <Bell size={16} color="#818CF8" />
             </View>
             <Text className="text-sm font-bold text-white">Latest Updates</Text>
@@ -181,40 +343,20 @@ export default function DashboardScreen() {
           </View>
         </View>
 
-        {/* ── MEMBERSHIP STATUS / UPGRADE ── */}
-        <View className="bg-[#121A2A] border border-[#1E2C44] rounded-3xl p-5 shadow-lg">
-          <View className="flex-row items-center justify-between mb-2">
-            <View className="flex-row items-center">
-              <ShieldCheck size={18} color="#38BDF8" />
-              <Text className="text-xs font-bold text-sky-400 uppercase tracking-wider ml-2">
-                Membership Tier
-              </Text>
-            </View>
-            <View className="bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full">
-              <Text className="text-[11px] font-bold text-emerald-400 uppercase">
-                {subscription.plan}
-              </Text>
-            </View>
-          </View>
-
-          <Text className="text-base font-extrabold text-white mb-1">
-            Access Full Opportunity Hub
-          </Text>
-          <Text className="text-xs text-slate-400 mb-4 leading-relaxed">
-            Upgrade your account to access verified training tasks, dedicated mentorship, and premium community privileges.
-          </Text>
-
-          <TouchableOpacity
-            onPress={handleUpgrade}
-            activeOpacity={0.85}
-            className="bg-sky-400 active:bg-sky-300 py-3 px-4 rounded-xl flex-row items-center justify-center shadow-md shadow-sky-500/20"
-          >
-            <Text className="text-slate-950 font-black text-xs uppercase tracking-wider mr-2">
-              {Platform.OS === 'android' ? 'Upgrade Membership Plan' : 'Manage Account on Web'}
+        {/* ── QUICK LINK TO MEMBERSHIP DETAILS (BOTTOM BANNER) ── */}
+        <TouchableOpacity
+          onPress={() => router.push('/(tabs)/membership' as any)}
+          activeOpacity={0.8}
+          className="bg-evermore-surface border border-evermore-border rounded-2xl p-4 flex-row items-center justify-between"
+        >
+          <View className="flex-row items-center flex-1 pr-2">
+            <ShieldCheck size={18} color="#00E5FF" />
+            <Text className="text-xs font-bold text-white ml-2.5">
+              View Tier Comparison &amp; Benefits Table
             </Text>
-            <ExternalLink size={14} color="#020617" />
-          </TouchableOpacity>
-        </View>
+          </View>
+          <ChevronRight size={16} color="#00E5FF" />
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
