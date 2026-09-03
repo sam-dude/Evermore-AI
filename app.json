@@ -11,6 +11,7 @@
       "icon": "./assets/images/icon.png",
       "bundleIdentifier": "com.evermore.ai",
       "buildNumber": "2",
+      "appleTeamId": "3WXV3ZR8CX",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
