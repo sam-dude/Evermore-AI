@@ -2,17 +2,22 @@
   "expo": {
     "name": "Evermore AI",
     "slug": "evermore-ai",
-    "version": "1.0.0",
+    "version": "1.02",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "evermoreai",
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/images/icon.png",
-      "bundleIdentifier": "com.evermore.ai"
+      "bundleIdentifier": "com.evermore.ai",
+      "buildNumber": "2",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "com.evermore.ai",
+      "versionCode": 2,
       "predictiveBackGestureEnabled": false
     },
     "web": {
