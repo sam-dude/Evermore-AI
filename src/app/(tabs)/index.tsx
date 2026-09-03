@@ -21,6 +21,7 @@ import {
   Zap,
   ChevronRight,
   CheckCircle2,
+  Globe,
 } from 'lucide-react-native';
 import { useAuth } from '@/context/auth-context';
 import { CheckinCard } from '@/components/checkin-card';
@@ -59,10 +60,11 @@ export default function DashboardScreen() {
   };
 
   const handleUpgrade = async (plan: 'basic' | 'premium' = 'basic') => {
-    // Compliant with Apple Guideline 3.1.1: never direct iOS users to raw purchase links with 'pay' in domain
-    const targetUrl = Platform.OS === 'ios'
-      ? WEB_DASHBOARD_URL
-      : (plan === 'premium' ? FLUTTERWAVE_PREMIUM_URL : FLUTTERWAVE_TRIAL_URL);
+    if (Platform.OS === 'ios') {
+      router.push('/(tabs)/membership' as any);
+      return;
+    }
+    const targetUrl = plan === 'premium' ? FLUTTERWAVE_PREMIUM_URL : FLUTTERWAVE_TRIAL_URL;
     try {
       await WebBrowser.openBrowserAsync(targetUrl, {
         toolbarColor: '#050B14',
@@ -213,43 +215,58 @@ export default function DashboardScreen() {
           </Text>
 
           {isFree ? (
-            /* Dual Tier Access CTAs (No explicit currency symbols to prevent iOS review rejections) */
-            <View className="flex-row" style={{ gap: 10 }}>
+            Platform.OS === 'ios' ? (
               <TouchableOpacity
-                onPress={() => handleUpgrade('basic')}
+                onPress={() => router.push('/(tabs)/membership' as any)}
                 activeOpacity={0.8}
-                className="flex-1 bg-evermore-surfaceLight border border-evermore-border py-3 rounded-xl items-center justify-center"
+                className="bg-evermore-surfaceLight border border-evermore-border py-3 rounded-xl flex-row items-center justify-center"
               >
-                <Text className="text-[10px] font-bold text-slate-400 uppercase">Basic Tier</Text>
-                <Text className="text-xs font-black text-evermore-cyan mt-0.5">Standard Track</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={() => handleUpgrade('premium')}
-                activeOpacity={0.85}
-                className="flex-1 py-3 rounded-xl items-center justify-center"
-                style={{
-                  backgroundColor: '#00E5FF',
-                  shadowColor: '#00E5FF',
-                  shadowOffset: { width: 0, height: 3 },
-                  shadowOpacity: 0.35,
-                  shadowRadius: 10,
-                }}
-              >
-                <Text className="text-[10px] font-black text-evermore-bg uppercase tracking-wide">
-                  Premium Tier
+                <ShieldCheck size={15} color="#00E5FF" />
+                <Text className="text-xs font-bold text-evermore-cyan ml-2">
+                  View Ecosystem Membership Tiers
                 </Text>
-                <Text className="text-xs font-black text-evermore-bg mt-0.5">Priority Track</Text>
+                <ChevronRight size={14} color="#00E5FF" style={{ marginLeft: 4 }} />
               </TouchableOpacity>
-            </View>
+            ) : (
+              /* Android retains direct track buttons */
+              <View className="flex-row" style={{ gap: 10 }}>
+                <TouchableOpacity
+                  onPress={() => handleUpgrade('basic')}
+                  activeOpacity={0.8}
+                  className="flex-1 bg-evermore-surfaceLight border border-evermore-border py-3 rounded-xl items-center justify-center"
+                >
+                  <Text className="text-[10px] font-bold text-slate-400 uppercase">Basic Tier</Text>
+                  <Text className="text-xs font-black text-evermore-cyan mt-0.5">Standard Track</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => handleUpgrade('premium')}
+                  activeOpacity={0.85}
+                  className="flex-1 py-3 rounded-xl items-center justify-center"
+                  style={{
+                    backgroundColor: '#00E5FF',
+                    shadowColor: '#00E5FF',
+                    shadowOffset: { width: 0, height: 3 },
+                    shadowOpacity: 0.35,
+                    shadowRadius: 10,
+                  }}
+                >
+                  <Text className="text-[10px] font-black text-evermore-bg uppercase tracking-wide">
+                    Premium Tier
+                  </Text>
+                  <Text className="text-xs font-black text-evermore-bg mt-0.5">Priority Track</Text>
+                </TouchableOpacity>
+              </View>
+            )
           ) : (
             <TouchableOpacity
-              onPress={handleManageWeb}
+              onPress={() => router.push('/(tabs)/membership' as any)}
               activeOpacity={0.8}
               className="bg-evermore-surfaceLight border border-evermore-border py-2.5 rounded-xl flex-row items-center justify-center"
             >
-              <Text className="text-xs font-bold text-white mr-2">Manage Account on Official Portal</Text>
-              <ExternalLink size={13} color="#00E5FF" />
+              <ShieldCheck size={14} color="#00E5FF" />
+              <Text className="text-xs font-bold text-white ml-2 mr-1">View Membership Status</Text>
+              <ChevronRight size={13} color="#94A3B8" />
             </TouchableOpacity>
           )}
         </View>
@@ -357,6 +374,21 @@ export default function DashboardScreen() {
           </View>
           <ChevronRight size={16} color="#00E5FF" />
         </TouchableOpacity>
+
+        {/* ── OFFICIAL PORTAL SHORTCUT ── */}
+        <View className="items-center mt-5 mb-2">
+          <TouchableOpacity
+            onPress={handleManageWeb}
+            activeOpacity={0.75}
+            className="flex-row items-center py-2.5 px-4 rounded-full bg-evermore-surface border border-slate-800"
+          >
+            <Globe size={13} color="#00E5FF" />
+            <Text className="text-[11px] font-semibold text-slate-400 ml-2 mr-1.5">
+              Official Portal: <Text className="text-evermore-cyan font-bold">evermoreinnovation.site</Text>
+            </Text>
+            <ExternalLink size={11} color="#00E5FF" />
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );

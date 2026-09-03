@@ -23,6 +23,7 @@ import {
   LogOut,
   ChevronRight,
   Crown,
+  Globe,
 } from 'lucide-react-native';
 import { useAuth } from '@/context/auth-context';
 
@@ -184,14 +185,25 @@ export default function ProfileScreen() {
             <ChevronRight size={14} color="#00E5FF" />
           </TouchableOpacity>
 
-          <TouchableOpacity
-            onPress={() => handleOpenLink(WEB_URL)}
-            activeOpacity={0.75}
-            className="bg-evermore-surfaceLight border border-evermore-border py-2.5 px-4 rounded-xl flex-row items-center justify-between"
-          >
-            <Text className="text-xs font-semibold text-slate-400">Manage Billing on Web Portal</Text>
-            <ExternalLink size={13} color="#94A3B8" />
-          </TouchableOpacity>
+          {Platform.OS === 'ios' ? (
+            <TouchableOpacity
+              onPress={() => router.push('/(tabs)/membership' as any)}
+              activeOpacity={0.75}
+              className="bg-evermore-surfaceLight border border-evermore-border py-2.5 px-4 rounded-xl flex-row items-center justify-between"
+            >
+              <Text className="text-xs font-semibold text-slate-400">Account Access &amp; Sync</Text>
+              <ChevronRight size={13} color="#94A3B8" />
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              onPress={() => handleOpenLink(WEB_URL)}
+              activeOpacity={0.75}
+              className="bg-evermore-surfaceLight border border-evermore-border py-2.5 px-4 rounded-xl flex-row items-center justify-between"
+            >
+              <Text className="text-xs font-semibold text-slate-400">Manage Billing on Web Portal</Text>
+              <ExternalLink size={13} color="#94A3B8" />
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* ── SETTINGS GROUP: COMMUNITY & SUPPORT ── */}
@@ -199,6 +211,27 @@ export default function ProfileScreen() {
           <Text className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 px-1">
             Community &amp; Support
           </Text>
+
+          <TouchableOpacity
+            onPress={() => handleOpenLink(WEB_URL)}
+            activeOpacity={0.7}
+            className="flex-row items-center justify-between py-3.5 px-1 border-b border-slate-800/60"
+          >
+            <View className="flex-row items-center">
+              <View className="w-8 h-8 rounded-xl bg-cyan-500/10 items-center justify-center mr-2.5">
+                <Globe size={15} color="#00E5FF" />
+              </View>
+              <View>
+                <Text className="text-xs font-bold text-white">
+                  Official Web Portal
+                </Text>
+                <Text className="text-[10px] text-slate-400">
+                  evermoreinnovation.site
+                </Text>
+              </View>
+            </View>
+            <ExternalLink size={14} color="#00E5FF" />
+          </TouchableOpacity>
 
           <TouchableOpacity
             onPress={() => handleOpenLink(TELEGRAM_URL)}
@@ -217,7 +250,7 @@ export default function ProfileScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity
-            onPress={() => Linking.openURL('mailto:customercare@evermoreinnovation.site')}
+            onPress={() => Linking.openURL('mailto:Quickloaddata@gmail.com').catch(() => {})}
             activeOpacity={0.7}
             className="flex-row items-center justify-between py-3.5 px-1"
           >

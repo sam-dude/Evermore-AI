@@ -2,7 +2,7 @@
   "expo": {
     "name": "Evermore AI",
     "slug": "evermore-ai",
-    "version": "1.02",
+    "version": "1.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "evermoreai",
@@ -10,8 +10,9 @@
     "ios": {
       "icon": "./assets/images/icon.png",
       "bundleIdentifier": "com.evermore.ai",
-      "buildNumber": "2",
+      "buildNumber": "4",
       "appleTeamId": "3WXV3ZR8CX",
+      "supportsTablet": false,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }

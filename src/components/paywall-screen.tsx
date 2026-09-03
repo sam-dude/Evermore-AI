@@ -46,10 +46,8 @@ const PLAN_FEATURES = [
 export function PaywallScreen({ onDismiss, currentPlan = 'free' }: PaywallScreenProps) {
 
   const handleSubscribe = async (plan: 'basic' | 'premium') => {
-    // Compliant with Apple Guideline 3.1.1: never direct iOS users to raw purchase links with 'pay' in domain
-    const targetUrl = Platform.OS === 'ios'
-      ? WEB_PORTAL_URL
-      : (plan === 'premium' ? FLUTTERWAVE_PREMIUM_URL : FLUTTERWAVE_BASIC_URL);
+    if (Platform.OS === 'ios') return;
+    const targetUrl = plan === 'premium' ? FLUTTERWAVE_PREMIUM_URL : FLUTTERWAVE_BASIC_URL;
     try {
       await WebBrowser.openBrowserAsync(targetUrl, {
         toolbarColor: '#050B14',
@@ -130,14 +128,22 @@ export function PaywallScreen({ onDismiss, currentPlan = 'free' }: PaywallScreen
             ))}
           </View>
 
-          <TouchableOpacity
-            onPress={() => handleSubscribe('basic')}
-            activeOpacity={0.8}
-            className="bg-evermore-surfaceLight border border-evermore-border py-3 rounded-xl flex-row items-center justify-center"
-          >
-            <Text className="text-xs font-bold text-evermore-cyan mr-1.5">Select Basic Tier on Web</Text>
-            <ExternalLink size={12} color="#00E5FF" />
-          </TouchableOpacity>
+          {Platform.OS !== 'ios' ? (
+            <TouchableOpacity
+              onPress={() => handleSubscribe('basic')}
+              activeOpacity={0.8}
+              className="bg-evermore-surfaceLight border border-evermore-border py-3 rounded-xl flex-row items-center justify-center"
+            >
+              <Text className="text-xs font-bold text-evermore-cyan mr-1.5">Select Basic Tier</Text>
+              <ExternalLink size={12} color="#00E5FF" />
+            </TouchableOpacity>
+          ) : (
+            <View className="bg-evermore-surfaceLight/60 border border-evermore-border/60 py-2.5 rounded-xl items-center justify-center">
+              <Text className="text-xs font-semibold text-slate-400">
+                {currentPlan === 'basic' || currentPlan === 'premium' ? 'Included in your account' : 'Standard Web Tier'}
+              </Text>
+            </View>
+          )}
         </View>
 
         {/* Premium Plan Card */}
@@ -182,23 +188,31 @@ export function PaywallScreen({ onDismiss, currentPlan = 'free' }: PaywallScreen
             ))}
           </View>
 
-          <TouchableOpacity
-            onPress={() => handleSubscribe('premium')}
-            activeOpacity={0.85}
-            className="py-3.5 rounded-xl flex-row items-center justify-center"
-            style={{
-              backgroundColor: '#00E5FF',
-              shadowColor: '#00E5FF',
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.3,
-              shadowRadius: 12,
-            }}
-          >
-            <Text className="text-xs font-extrabold text-evermore-bg uppercase tracking-wider mr-1.5">
-              Select Premium Tier on Web
-            </Text>
-            <ExternalLink size={12} color="#050B14" />
-          </TouchableOpacity>
+          {Platform.OS !== 'ios' ? (
+            <TouchableOpacity
+              onPress={() => handleSubscribe('premium')}
+              activeOpacity={0.85}
+              className="py-3.5 rounded-xl flex-row items-center justify-center"
+              style={{
+                backgroundColor: '#00E5FF',
+                shadowColor: '#00E5FF',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.3,
+                shadowRadius: 12,
+              }}
+            >
+              <Text className="text-xs font-extrabold text-evermore-bg uppercase tracking-wider mr-1.5">
+                Select Premium Tier
+              </Text>
+              <ExternalLink size={12} color="#050B14" />
+            </TouchableOpacity>
+          ) : (
+            <View className="bg-evermore-surfaceLight/60 border border-evermore-border/60 py-2.5 rounded-xl items-center justify-center">
+              <Text className="text-xs font-semibold text-slate-400">
+                {currentPlan === 'premium' ? 'Active on your account' : 'Available with Web Membership'}
+              </Text>
+            </View>
+          )}
         </View>
 
         {/* Security Note */}
@@ -212,7 +226,7 @@ export function PaywallScreen({ onDismiss, currentPlan = 'free' }: PaywallScreen
         <View className="items-center">
           <Text className="text-[11px] text-slate-500 mb-1">Need help with your tier?</Text>
           <TouchableOpacity
-            onPress={() => Linking.openURL('mailto:customercare@evermoreinnovation.site')}
+            onPress={() => Linking.openURL('mailto:Quickloaddata@gmail.com').catch(() => {})}
           >
             <Text className="text-xs font-bold text-evermore-cyan">Contact Support</Text>
           </TouchableOpacity>

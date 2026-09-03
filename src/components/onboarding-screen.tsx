@@ -1,223 +1,152 @@
-import React, { useState, useRef } from 'react';
+import React from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
-  Dimensions,
-  FlatList,
   Image,
-  Platform,
+  ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { BookOpen, Flame, Compass, ArrowRight, CheckCircle2, Sparkles } from 'lucide-react-native';
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+import * as WebBrowser from 'expo-web-browser';
+import { GradientButton } from '@/components/gradient-button';
 
 interface OnboardingScreenProps {
   onFinish: () => void;
   onLoginPress: () => void;
 }
 
-const SLIDES = [
-  {
-    id: '1',
-    icon: BookOpen,
-    iconColor: '#00E5FF',
-    badge: 'Curated Knowledge',
-    title: 'Learn Practical\nDigital Skills',
-    description:
-      'Master essential tech concepts, data workflows, and modern digital skills through structured, bite-sized lessons.',
-    highlight: '5+ Interactive Learning Modules',
-  },
-  {
-    id: '2',
-    icon: Flame,
-    iconColor: '#F59E0B',
-    badge: 'Consistency & Growth',
-    title: 'Build Your Daily\nLearning Streak',
-    description:
-      'Check in daily, test your retention with quizzes, and earn EverPoints as you progress toward your goals.',
-    highlight: 'Earn points & build habits daily',
-  },
-  {
-    id: '3',
-    icon: Compass,
-    iconColor: '#34D399',
-    badge: 'Vibrant Community',
-    title: 'Unlock Verified\nOpportunities',
-    description:
-      'Join thousands of motivated members across Africa connecting with peer communities and digital tasks.',
-    highlight: 'Official Telegram & Mentorship',
-  },
-];
-
 export function OnboardingScreen({ onFinish, onLoginPress }: OnboardingScreenProps) {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const flatListRef = useRef<FlatList>(null);
-
-  const handleNext = () => {
-    if (currentIndex < SLIDES.length - 1) {
-      flatListRef.current?.scrollToIndex({
-        index: currentIndex + 1,
-        animated: true,
-      });
-    } else {
-      onFinish();
-    }
+  const openLegal = async (url: string) => {
+    try {
+      await WebBrowser.openBrowserAsync(url, { toolbarColor: '#050B14' });
+    } catch {}
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-evermore-bg">
-      {/* ── TOP BAR ── */}
-      <View className="flex-row items-center justify-between px-6 pt-3 pb-2">
-        <View className="flex-row items-center">
-          <View className="w-9 h-9 rounded-xl overflow-hidden mr-2.5 border border-evermore-border bg-evermore-surface">
-            <Image
-              source={require('../../assets/images/evertap-logo.jpeg')}
-              style={{ width: '100%', height: '100%' }}
-              resizeMode="cover"
+    <SafeAreaView className="flex-1 bg-[#050B14]" edges={['top', 'bottom']}>
+      <ScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent: 'space-between',
+          paddingHorizontal: 22,
+          paddingTop: 8,
+          paddingBottom: 16,
+        }}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* ── TOP HEADER (CLEAN & MINIMAL) ── */}
+        <View className="flex-row items-center justify-between pt-1 pb-2">
+          <View className="flex-row items-center">
+            <View
+              className="w-9 h-9 rounded-xl overflow-hidden mr-2.5 border border-cyan-500/25 bg-[#0A1628] items-center justify-center"
+              style={{
+                shadowColor: '#00E5FF',
+                shadowOffset: { width: 0, height: 0 },
+                shadowOpacity: 0.3,
+                shadowRadius: 8,
+              }}
+            >
+              <Image
+                source={require('../../assets/images/evertap-logo.jpeg')}
+                style={{ width: '100%', height: '100%' }}
+                resizeMode="cover"
+              />
+            </View>
+            <Text className="text-base font-black text-white tracking-widest uppercase">
+              EVERMORE
+            </Text>
+          </View>
+
+          {/* REGISTER NOW Button */}
+          <GradientButton
+            title="REGISTER NOW"
+            onPress={onFinish}
+            size="sm"
+            style={{ paddingHorizontal: 16, height: 36 }}
+            textStyle={{ fontSize: 11, fontWeight: '900', letterSpacing: 0.5 }}
+          />
+        </View>
+
+        {/* ── HERO CARD (CENTERPIECE - CLEAN & SPACIOUS) ── */}
+        <View className="my-auto py-4">
+          <View
+            className="bg-[#0A1628] border rounded-[30px] px-6 py-8 sm:p-9"
+            style={{
+              borderColor: 'rgba(0, 229, 255, 0.2)',
+              shadowColor: '#00E5FF',
+              shadowOffset: { width: 0, height: 8 },
+              shadowOpacity: 0.1,
+              shadowRadius: 28,
+            }}
+          >
+            {/* Tagline */}
+            <Text
+              className="text-[10px] font-black text-[#00E5FF] uppercase tracking-[0.2em] text-center mb-4"
+              style={{ letterSpacing: 1.8 }}
+            >
+              YOUR NEXT EXPERIENCE STARTS HERE
+            </Text>
+
+            {/* Headline */}
+            <Text className="text-2xl sm:text-3xl font-black text-white text-center leading-tight tracking-tight mb-3.5">
+              Ready to discover{'\n'}more with Evermore?
+            </Text>
+
+            {/* Subtitle */}
+            <Text className="text-xs sm:text-sm text-slate-300 text-center leading-relaxed mb-8 px-1">
+              Create your account and step into a digital experience built around participation, entertainment and opportunities.
+            </Text>
+
+            {/* Main Action Button */}
+            <GradientButton
+              title="CREATE YOUR ACCOUNT"
+              onPress={onFinish}
+              size="lg"
+              textStyle={{ fontSize: 13, fontWeight: '900', letterSpacing: 1 }}
             />
           </View>
-          <Text className="text-base font-extrabold text-white tracking-tight">
-            EVER<Text className="text-evermore-cyan">MORE</Text>
-          </Text>
+
+          {/* Sign In Link */}
+          <TouchableOpacity
+            onPress={onLoginPress}
+            activeOpacity={0.75}
+            className="items-center py-3 mt-3"
+          >
+            <Text className="text-xs text-slate-400">
+              Already have an account?{' '}
+              <Text className="text-[#00E5FF] font-bold">Sign In</Text>
+            </Text>
+          </TouchableOpacity>
         </View>
 
-        <TouchableOpacity onPress={onFinish} activeOpacity={0.7} className="py-1.5 px-3 rounded-full bg-slate-800/50">
-          <Text className="text-xs font-semibold text-slate-400">Skip</Text>
-        </TouchableOpacity>
-      </View>
+        {/* ── FOOTER (MATCHING SCREENSHOT 1) ── */}
+        <View className="items-center pt-2 pb-1">
+          <Text
+            className="text-xs font-black text-[#00F5A0] tracking-widest mb-2"
+            style={{ letterSpacing: 1 }}
+          >
+            #ExistBeyondTheMoment
+          </Text>
 
-      {/* ── CAROUSEL ── */}
-      <FlatList
-        ref={flatListRef}
-        data={SLIDES}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        onMomentumScrollEnd={(e) => {
-          const index = Math.round(e.nativeEvent.contentOffset.x / SCREEN_WIDTH);
-          setCurrentIndex(index);
-        }}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => {
-          const IconComponent = item.icon;
-          return (
-            <View style={{ width: SCREEN_WIDTH }} className="px-7 justify-center flex-1 py-6">
-              {/* Graphic Card with Glow */}
-              <View
-                className="bg-evermore-surface border border-evermore-border rounded-3xl p-8 mb-8 items-center justify-center min-h-[220px]"
-                style={{
-                  shadowColor: item.iconColor,
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.12,
-                  shadowRadius: 20,
-                }}
-              >
-                <View
-                  className="w-20 h-20 rounded-2xl items-center justify-center mb-5"
-                  style={{
-                    backgroundColor: `${item.iconColor}15`,
-                    borderWidth: 1,
-                    borderColor: `${item.iconColor}30`,
-                    shadowColor: item.iconColor,
-                    shadowOffset: { width: 0, height: 0 },
-                    shadowOpacity: 0.4,
-                    shadowRadius: 12,
-                  }}
-                >
-                  <IconComponent size={36} color={item.iconColor} strokeWidth={1.8} />
-                </View>
+          <Text className="text-[11px] text-slate-500 mb-2.5">
+            © 2026 EVERMORE. All Rights Reserved.
+          </Text>
 
-                <View className="flex-row items-center bg-slate-800/80 border border-slate-700/60 px-3.5 py-1.5 rounded-full">
-                  <CheckCircle2 size={13} color="#00E5FF" />
-                  <Text className="text-xs font-medium text-slate-200 ml-1.5">
-                    {item.highlight}
-                  </Text>
-                </View>
-              </View>
-
-              {/* Text Info */}
-              <View className="mb-2">
-                <View
-                  className="self-start px-3 py-1.5 rounded-full mb-3"
-                  style={{
-                    backgroundColor: `${item.iconColor}10`,
-                    borderWidth: 1,
-                    borderColor: `${item.iconColor}20`,
-                  }}
-                >
-                  <Text
-                    className="text-[11px] font-bold uppercase tracking-wider"
-                    style={{ color: item.iconColor }}
-                  >
-                    {item.badge}
-                  </Text>
-                </View>
-
-                <Text className="text-3xl font-black text-white leading-tight tracking-tight mb-3">
-                  {item.title}
-                </Text>
-
-                <Text className="text-sm text-slate-400 leading-relaxed">
-                  {item.description}
-                </Text>
-              </View>
-            </View>
-          );
-        }}
-      />
-
-      {/* ── BOTTOM CONTROLS ── */}
-      <View className="px-7 pb-8 pt-2">
-        {/* Pagination Dots */}
-        <View className="flex-row items-center justify-center mb-6" style={{ gap: 8 }}>
-          {SLIDES.map((slide, idx) => (
-            <View
-              key={idx}
-              style={{
-                height: 8,
-                borderRadius: 4,
-                width: currentIndex === idx ? 28 : 8,
-                backgroundColor: currentIndex === idx ? '#00E5FF' : '#1E293B',
-                ...(currentIndex === idx ? {
-                  shadowColor: '#00E5FF',
-                  shadowOffset: { width: 0, height: 0 },
-                  shadowOpacity: 0.5,
-                  shadowRadius: 6,
-                } : {}),
-              }}
-            />
-          ))}
+          <View className="flex-row items-center" style={{ gap: 14 }}>
+            <TouchableOpacity onPress={() => openLegal('https://evermoreinnovation.site/privacy.html')}>
+              <Text className="text-xs text-slate-400 font-medium">Privacy</Text>
+            </TouchableOpacity>
+            <Text className="text-slate-700 text-xs">•</Text>
+            <TouchableOpacity onPress={() => openLegal('https://evermoreinnovation.site/terms.html')}>
+              <Text className="text-xs text-slate-400 font-medium">Terms</Text>
+            </TouchableOpacity>
+            <Text className="text-slate-700 text-xs">•</Text>
+            <TouchableOpacity onPress={() => openLegal('https://evermoreinnovation.site/terms.html')}>
+              <Text className="text-xs text-slate-400 font-medium">Disclaimer</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-
-        {/* Primary CTA */}
-        <TouchableOpacity
-          onPress={handleNext}
-          activeOpacity={0.85}
-          className="py-4 rounded-2xl flex-row items-center justify-center mb-3.5"
-          style={{
-            backgroundColor: '#00E5FF',
-            shadowColor: '#00E5FF',
-            shadowOffset: { width: 0, height: 6 },
-            shadowOpacity: 0.35,
-            shadowRadius: 16,
-          }}
-        >
-          <Text className="font-extrabold text-evermore-bg text-sm mr-2">
-            {currentIndex === SLIDES.length - 1 ? 'Get Started' : 'Continue'}
-          </Text>
-          <ArrowRight size={16} color="#050B14" strokeWidth={2.5} />
-        </TouchableOpacity>
-
-        {/* Sign In Link */}
-        <TouchableOpacity onPress={onLoginPress} activeOpacity={0.7} className="items-center py-2">
-          <Text className="text-xs text-slate-400">
-            Already have an account?{' '}
-            <Text className="text-evermore-cyan font-bold">Sign In</Text>
-          </Text>
-        </TouchableOpacity>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
