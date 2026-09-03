@@ -9,7 +9,10 @@ import { AuthProvider, useAuth } from '@/context/auth-context';
 import { AuthScreen } from '@/components/auth-screen';
 import { OnboardingScreen } from '@/components/onboarding-screen';
 
-SplashScreen.preventAutoHideAsync().catch(() => {});
+// Prevent splash screen auto-hide safely
+try {
+  SplashScreen.preventAutoHideAsync().catch(() => {});
+} catch {}
 
 const ONBOARDING_SEEN_KEY = '@evermore_has_seen_onboarding';
 
@@ -32,9 +35,16 @@ function RootNavigator() {
   };
 
   useEffect(() => {
-    if (!isLoading && showOnboarding !== null) {
-      SplashScreen.hideAsync().catch(() => {});
+    async function hideSplash() {
+      if (!isLoading && showOnboarding !== null) {
+        try {
+          await SplashScreen.hideAsync();
+        } catch {
+          // Ignore - already hidden on fast reload
+        }
+      }
     }
+    hideSplash();
   }, [isLoading, showOnboarding]);
 
   if (isLoading || showOnboarding === null) {
