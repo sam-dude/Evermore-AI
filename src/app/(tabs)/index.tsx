@@ -14,26 +14,20 @@ import {
   Sparkles,
   BookOpen,
   ArrowRight,
-  ShieldCheck,
   ExternalLink,
   Bell,
-  Crown,
-  Zap,
-  ChevronRight,
-  CheckCircle2,
-  Globe,
+  MessageCircle,
+  Flame,
 } from 'lucide-react-native';
 import { useAuth } from '@/context/auth-context';
 import { CheckinCard } from '@/components/checkin-card';
 import { LESSONS } from '@/data/lessons';
 
-const FLUTTERWAVE_TRIAL_URL = 'https://flutterwave.com/pay/evermoreai';
-const FLUTTERWAVE_PREMIUM_URL = 'https://flutterwave.com/pay/everaipremium';
-const WEB_DASHBOARD_URL = 'https://evermoreinnovation.site/';
+const TELEGRAM_URL = 'https://t.me/evermoreai?text=evermore';
 
 export default function DashboardScreen() {
   const router = useRouter();
-  const { user, subscription, lessonProgress, checkIn } = useAuth();
+  const { user, lessonProgress, checkIn } = useAuth();
   const [checkinLoading, setCheckinLoading] = useState(false);
   const [checkinAlert, setCheckinAlert] = useState<string | null>(null);
 
@@ -59,33 +53,15 @@ export default function DashboardScreen() {
     }
   };
 
-  const handleUpgrade = async (plan: 'basic' | 'premium' = 'basic') => {
-    if (Platform.OS === 'ios') {
-      router.push('/(tabs)/membership' as any);
-      return;
-    }
-    const targetUrl = plan === 'premium' ? FLUTTERWAVE_PREMIUM_URL : FLUTTERWAVE_TRIAL_URL;
+  const handleOpenCommunity = async () => {
     try {
-      await WebBrowser.openBrowserAsync(targetUrl, {
+      await WebBrowser.openBrowserAsync(TELEGRAM_URL, {
         toolbarColor: '#050B14',
       });
     } catch {
-      Linking.openURL(targetUrl);
+      Linking.openURL(TELEGRAM_URL);
     }
   };
-
-  const handleManageWeb = async () => {
-    try {
-      await WebBrowser.openBrowserAsync(WEB_DASHBOARD_URL, {
-        toolbarColor: '#050B14',
-      });
-    } catch {
-      Linking.openURL(WEB_DASHBOARD_URL);
-    }
-  };
-
-  const isFree = subscription.plan === 'free';
-  const planName = (subscription.plan || 'free').toUpperCase();
 
   return (
     <SafeAreaView className="flex-1 bg-evermore-bg" edges={['top']}>
@@ -104,33 +80,23 @@ export default function DashboardScreen() {
             </Text>
           </View>
 
-          {/* Top Actions: Membership Badge & Points Pill */}
+          {/* Top Actions: Streak Badge & Points Pill */}
           <View className="flex-row items-center" style={{ gap: 8 }}>
-            {/* Membership Pill (Tappable direct shortcut to Membership Tab, clean and compliant) */}
-            <TouchableOpacity
-              onPress={() => router.push('/(tabs)/membership' as any)}
-              activeOpacity={0.8}
-              className={`flex-row items-center px-3 py-1.5 rounded-full border ${
-                isFree
-                  ? 'bg-amber-500/10 border-amber-500/30'
-                  : 'bg-emerald-500/10 border-emerald-500/30'
-              }`}
+            {/* Streak Pill */}
+            <View
+              className="flex-row items-center bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 rounded-full"
               style={{
-                shadowColor: isFree ? '#F59E0B' : '#10B981',
+                shadowColor: '#F59E0B',
                 shadowOffset: { width: 0, height: 0 },
                 shadowOpacity: 0.25,
                 shadowRadius: 6,
               }}
             >
-              <Crown size={13} color={isFree ? '#F59E0B' : '#10B981'} />
-              <Text
-                className={`text-[10px] font-black uppercase ml-1.5 ${
-                  isFree ? 'text-amber-400' : 'text-emerald-400'
-                }`}
-              >
-                {isFree ? 'FREE TIER' : `${planName}`}
+              <Flame size={13} color="#F59E0B" />
+              <Text className="text-[10px] font-black text-amber-400 uppercase ml-1.5">
+                {user?.streak || 0}D STREAK
               </Text>
-            </TouchableOpacity>
+            </View>
 
             {/* Points Pill */}
             <View
@@ -165,110 +131,61 @@ export default function DashboardScreen() {
           </View>
         )}
 
-        {/* ── HERO MEMBERSHIP VIP CARD (CLEAN, NO EXPLICIT PRICES) ── */}
+        {/* ── JOIN THE COMMUNITY HERO CARD ── */}
         <View
           className="bg-evermore-surface border rounded-3xl p-5 mb-5"
           style={{
-            borderColor: isFree ? 'rgba(245, 158, 11, 0.35)' : 'rgba(0, 229, 255, 0.35)',
-            shadowColor: isFree ? '#F59E0B' : '#00E5FF',
+            borderColor: 'rgba(0, 229, 255, 0.35)',
+            shadowColor: '#00E5FF',
             shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.12,
+            shadowOpacity: 0.15,
             shadowRadius: 18,
           }}
         >
-          <View className="flex-row items-center justify-between mb-3">
-            <View className="flex-row items-center">
-              <View
-                className={`w-11 h-11 rounded-2xl items-center justify-center mr-3 ${
-                  isFree ? 'bg-amber-500/15 border border-amber-500/30' : 'bg-cyan-500/15 border border-cyan-500/30'
-                }`}
-              >
-                <Crown size={22} color={isFree ? '#F59E0B' : '#00E5FF'} strokeWidth={2.2} />
-              </View>
-              <View>
-                <Text
-                  className={`text-[10px] font-black uppercase tracking-wider ${
-                    isFree ? 'text-amber-400' : 'text-evermore-cyan'
-                  }`}
-                >
-                  {isFree ? 'Access Tier' : 'VIP Active Member'}
-                </Text>
-                <Text className="text-base font-black text-white">
-                  {isFree ? 'Membership Packages' : `${planName} Member Tier`}
-                </Text>
-              </View>
-            </View>
-
-            <TouchableOpacity
-              onPress={() => router.push('/(tabs)/membership' as any)}
-              className="flex-row items-center bg-evermore-surfaceLight border border-evermore-border px-2.5 py-1 rounded-full"
+          <View className="flex-row items-center mb-3">
+            <View
+              className="w-12 h-12 rounded-2xl bg-cyan-500/15 border border-cyan-500/30 items-center justify-center mr-3"
+              style={{
+                shadowColor: '#00E5FF',
+                shadowOffset: { width: 0, height: 0 },
+                shadowOpacity: 0.35,
+                shadowRadius: 10,
+              }}
             >
-              <Text className="text-[10px] font-bold text-slate-300 mr-1">Tiers</Text>
-              <ChevronRight size={12} color="#94A3B8" />
-            </TouchableOpacity>
+              <MessageCircle size={22} color="#00E5FF" strokeWidth={2.2} />
+            </View>
+            <View className="flex-1">
+              <Text className="text-[10px] font-black text-evermore-cyan uppercase tracking-wider">
+                Official Telegram Group
+              </Text>
+              <Text className="text-base font-black text-white">
+                Join the Community
+              </Text>
+            </View>
           </View>
 
           <Text className="text-xs text-slate-300 leading-relaxed mb-4">
-            {isFree
-              ? 'Access verified campaign tasks, specialized AI training tracks, and community privileges across the Evermore ecosystem.'
-              : 'Your membership is active! Enjoy premium AI modules, priority submission reviews, and official community perks.'}
+            Connect with fellow AI learners, share quiz insights, discuss new topics, and get real-time study updates directly in our Telegram group.
           </Text>
 
-          {isFree ? (
-            Platform.OS === 'ios' ? (
-              <TouchableOpacity
-                onPress={() => router.push('/(tabs)/membership' as any)}
-                activeOpacity={0.8}
-                className="bg-evermore-surfaceLight border border-evermore-border py-3 rounded-xl flex-row items-center justify-center"
-              >
-                <ShieldCheck size={15} color="#00E5FF" />
-                <Text className="text-xs font-bold text-evermore-cyan ml-2">
-                  View Ecosystem Membership Tiers
-                </Text>
-                <ChevronRight size={14} color="#00E5FF" style={{ marginLeft: 4 }} />
-              </TouchableOpacity>
-            ) : (
-              /* Android retains direct track buttons */
-              <View className="flex-row" style={{ gap: 10 }}>
-                <TouchableOpacity
-                  onPress={() => handleUpgrade('basic')}
-                  activeOpacity={0.8}
-                  className="flex-1 bg-evermore-surfaceLight border border-evermore-border py-3 rounded-xl items-center justify-center"
-                >
-                  <Text className="text-[10px] font-bold text-slate-400 uppercase">Basic Tier</Text>
-                  <Text className="text-xs font-black text-evermore-cyan mt-0.5">Standard Track</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  onPress={() => handleUpgrade('premium')}
-                  activeOpacity={0.85}
-                  className="flex-1 py-3 rounded-xl items-center justify-center"
-                  style={{
-                    backgroundColor: '#00E5FF',
-                    shadowColor: '#00E5FF',
-                    shadowOffset: { width: 0, height: 3 },
-                    shadowOpacity: 0.35,
-                    shadowRadius: 10,
-                  }}
-                >
-                  <Text className="text-[10px] font-black text-evermore-bg uppercase tracking-wide">
-                    Premium Tier
-                  </Text>
-                  <Text className="text-xs font-black text-evermore-bg mt-0.5">Priority Track</Text>
-                </TouchableOpacity>
-              </View>
-            )
-          ) : (
-            <TouchableOpacity
-              onPress={() => router.push('/(tabs)/membership' as any)}
-              activeOpacity={0.8}
-              className="bg-evermore-surfaceLight border border-evermore-border py-2.5 rounded-xl flex-row items-center justify-center"
-            >
-              <ShieldCheck size={14} color="#00E5FF" />
-              <Text className="text-xs font-bold text-white ml-2 mr-1">View Membership Status</Text>
-              <ChevronRight size={13} color="#94A3B8" />
-            </TouchableOpacity>
-          )}
+          <TouchableOpacity
+            onPress={handleOpenCommunity}
+            activeOpacity={0.85}
+            className="py-3.5 px-4 rounded-xl flex-row items-center justify-center"
+            style={{
+              backgroundColor: '#00E5FF',
+              shadowColor: '#00E5FF',
+              shadowOffset: { width: 0, height: 3 },
+              shadowOpacity: 0.35,
+              shadowRadius: 10,
+            }}
+          >
+            <MessageCircle size={15} color="#050B14" strokeWidth={2.5} />
+            <Text className="text-xs font-black text-[#050B14] uppercase tracking-wider ml-2 mr-1">
+              Join Telegram Community
+            </Text>
+            <ExternalLink size={13} color="#050B14" />
+          </TouchableOpacity>
         </View>
 
         {/* ── DAILY CHECK-IN WIDGET ── */}
@@ -358,36 +275,6 @@ export default function DashboardScreen() {
               Maintain your daily streak to earn recognition and priority access to upcoming opportunities.
             </Text>
           </View>
-        </View>
-
-        {/* ── QUICK LINK TO MEMBERSHIP DETAILS (BOTTOM BANNER) ── */}
-        <TouchableOpacity
-          onPress={() => router.push('/(tabs)/membership' as any)}
-          activeOpacity={0.8}
-          className="bg-evermore-surface border border-evermore-border rounded-2xl p-4 flex-row items-center justify-between"
-        >
-          <View className="flex-row items-center flex-1 pr-2">
-            <ShieldCheck size={18} color="#00E5FF" />
-            <Text className="text-xs font-bold text-white ml-2.5">
-              View Tier Comparison &amp; Benefits Table
-            </Text>
-          </View>
-          <ChevronRight size={16} color="#00E5FF" />
-        </TouchableOpacity>
-
-        {/* ── OFFICIAL PORTAL SHORTCUT ── */}
-        <View className="items-center mt-5 mb-2">
-          <TouchableOpacity
-            onPress={handleManageWeb}
-            activeOpacity={0.75}
-            className="flex-row items-center py-2.5 px-4 rounded-full bg-evermore-surface border border-slate-800"
-          >
-            <Globe size={13} color="#00E5FF" />
-            <Text className="text-[11px] font-semibold text-slate-400 ml-2 mr-1.5">
-              Official Portal: <Text className="text-evermore-cyan font-bold">evermoreinnovation.site</Text>
-            </Text>
-            <ExternalLink size={11} color="#00E5FF" />
-          </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>

@@ -84,22 +84,22 @@ export function OnboardingScreen({ onFinish, onLoginPress }: OnboardingScreenPro
               className="text-[10px] font-black text-[#00E5FF] uppercase tracking-[0.2em] text-center mb-4"
               style={{ letterSpacing: 1.8 }}
             >
-              YOUR NEXT EXPERIENCE STARTS HERE
+              INTERACTIVE AI LEARNING &amp; TECH LITERACY
             </Text>
 
             {/* Headline */}
             <Text className="text-2xl sm:text-3xl font-black text-white text-center leading-tight tracking-tight mb-3.5">
-              Ready to discover{'\n'}more with Evermore?
+              Ready to learn and{'\n'}grow with Evermore?
             </Text>
 
             {/* Subtitle */}
             <Text className="text-xs sm:text-sm text-slate-300 text-center leading-relaxed mb-8 px-1">
-              Create your account and step into a digital experience built around participation, entertainment and opportunities.
+              Create your account to access bite-sized AI curriculum modules, retention quizzes, daily knowledge streaks, and student study community discussions.
             </Text>
 
             {/* Main Action Button */}
             <GradientButton
-              title="CREATE YOUR ACCOUNT"
+              title="START LEARNING NOW"
               onPress={onFinish}
               size="lg"
               textStyle={{ fontSize: 13, fontWeight: '900', letterSpacing: 1 }}
@@ -134,15 +134,11 @@ export function OnboardingScreen({ onFinish, onLoginPress }: OnboardingScreenPro
 
           <View className="flex-row items-center" style={{ gap: 14 }}>
             <TouchableOpacity onPress={() => openLegal('https://evermoreinnovation.site/privacy.html')}>
-              <Text className="text-xs text-slate-400 font-medium">Privacy</Text>
+              <Text className="text-xs text-slate-400 font-medium">Privacy Policy</Text>
             </TouchableOpacity>
             <Text className="text-slate-700 text-xs">•</Text>
             <TouchableOpacity onPress={() => openLegal('https://evermoreinnovation.site/terms.html')}>
-              <Text className="text-xs text-slate-400 font-medium">Terms</Text>
-            </TouchableOpacity>
-            <Text className="text-slate-700 text-xs">•</Text>
-            <TouchableOpacity onPress={() => openLegal('https://evermoreinnovation.site/terms.html')}>
-              <Text className="text-xs text-slate-400 font-medium">Disclaimer</Text>
+              <Text className="text-xs text-slate-400 font-medium">Terms of Service</Text>
             </TouchableOpacity>
           </View>
         </View>

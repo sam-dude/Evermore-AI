@@ -13,7 +13,6 @@ import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import {
   User as UserIcon,
-  ShieldCheck,
   Sparkles,
   Flame,
   ExternalLink,
@@ -22,15 +21,12 @@ import {
   FileText,
   LogOut,
   ChevronRight,
-  Crown,
-  Globe,
 } from 'lucide-react-native';
 import { useAuth } from '@/context/auth-context';
 
 const TELEGRAM_URL = 'https://t.me/evermoreai?text=evermore';
 const PRIVACY_URL = 'https://evermoreinnovation.site/privacy.html';
 const TERMS_URL = 'https://evermoreinnovation.site/terms.html';
-const WEB_URL = 'https://evermoreinnovation.site/';
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -122,7 +118,7 @@ export default function ProfileScreen() {
               <View className="flex-row items-center mt-1.5">
                 <View className="bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full mr-2">
                   <Text className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
-                    {subscription.plan} Plan
+                    Learner Account
                   </Text>
                 </View>
                 {user?.country && (
@@ -155,83 +151,11 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* ── MEMBERSHIP GROUP (HIGHLIGHTED & PROMINENT) ── */}
-        <View className="bg-evermore-surface border border-evermore-border rounded-3xl p-5 mb-5">
-          <View className="flex-row items-center justify-between mb-3">
-            <View className="flex-row items-center">
-              <Crown size={18} color="#F59E0B" />
-              <Text className="text-sm font-bold text-white ml-2">Membership &amp; Access Tier</Text>
-            </View>
-            <View className="bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 rounded-full">
-              <Text className="text-[10px] font-bold text-amber-400 uppercase">
-                {subscription.plan} • {subscription.status}
-              </Text>
-            </View>
-          </View>
-
-          <Text className="text-xs text-slate-400 mb-3.5 leading-relaxed">
-            Review your package perks, upgrade your access, or manage your subscription through our official web portal.
-          </Text>
-
-          <TouchableOpacity
-            onPress={() => router.push('/(tabs)/membership' as any)}
-            activeOpacity={0.8}
-            className="bg-evermore-cyan/10 border border-evermore-cyan/30 py-3 px-4 rounded-xl flex-row items-center justify-between mb-2.5"
-          >
-            <View className="flex-row items-center">
-              <ShieldCheck size={16} color="#00E5FF" />
-              <Text className="text-xs font-bold text-white ml-2">View Membership Plans &amp; Perks</Text>
-            </View>
-            <ChevronRight size={14} color="#00E5FF" />
-          </TouchableOpacity>
-
-          {Platform.OS === 'ios' ? (
-            <TouchableOpacity
-              onPress={() => router.push('/(tabs)/membership' as any)}
-              activeOpacity={0.75}
-              className="bg-evermore-surfaceLight border border-evermore-border py-2.5 px-4 rounded-xl flex-row items-center justify-between"
-            >
-              <Text className="text-xs font-semibold text-slate-400">Account Access &amp; Sync</Text>
-              <ChevronRight size={13} color="#94A3B8" />
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity
-              onPress={() => handleOpenLink(WEB_URL)}
-              activeOpacity={0.75}
-              className="bg-evermore-surfaceLight border border-evermore-border py-2.5 px-4 rounded-xl flex-row items-center justify-between"
-            >
-              <Text className="text-xs font-semibold text-slate-400">Manage Billing on Web Portal</Text>
-              <ExternalLink size={13} color="#94A3B8" />
-            </TouchableOpacity>
-          )}
-        </View>
-
         {/* ── SETTINGS GROUP: COMMUNITY & SUPPORT ── */}
         <View className="bg-evermore-surface border border-evermore-border rounded-3xl p-4 mb-5">
           <Text className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 px-1">
             Community &amp; Support
           </Text>
-
-          <TouchableOpacity
-            onPress={() => handleOpenLink(WEB_URL)}
-            activeOpacity={0.7}
-            className="flex-row items-center justify-between py-3.5 px-1 border-b border-slate-800/60"
-          >
-            <View className="flex-row items-center">
-              <View className="w-8 h-8 rounded-xl bg-cyan-500/10 items-center justify-center mr-2.5">
-                <Globe size={15} color="#00E5FF" />
-              </View>
-              <View>
-                <Text className="text-xs font-bold text-white">
-                  Official Web Portal
-                </Text>
-                <Text className="text-[10px] text-slate-400">
-                  evermoreinnovation.site
-                </Text>
-              </View>
-            </View>
-            <ExternalLink size={14} color="#00E5FF" />
-          </TouchableOpacity>
 
           <TouchableOpacity
             onPress={() => handleOpenLink(TELEGRAM_URL)}
@@ -243,7 +167,7 @@ export default function ProfileScreen() {
                 <MessageCircle size={15} color="#00E5FF" />
               </View>
               <Text className="text-xs font-semibold text-white">
-                Official Telegram Community
+                Join Telegram Community
               </Text>
             </View>
             <ChevronRight size={14} color="#475569" />

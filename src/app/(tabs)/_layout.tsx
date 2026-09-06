@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Platform } from 'react-native';
 import { Tabs } from 'expo-router';
-import { LayoutDashboard, BookOpen, Crown, User } from 'lucide-react-native';
+import { LayoutDashboard, BookOpen, User } from 'lucide-react-native';
 
 export default function TabLayout() {
   return (
@@ -65,22 +65,6 @@ export default function TabLayout() {
               shadowRadius: 8,
             } : undefined}>
               <BookOpen size={21} color={color} strokeWidth={focused ? 2.5 : 1.8} />
-            </View>
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="membership"
-        options={{
-          title: 'Membership',
-          tabBarIcon: ({ color, focused }) => (
-            <View style={focused ? {
-              shadowColor: '#F59E0B',
-              shadowOffset: { width: 0, height: 0 },
-              shadowOpacity: 0.6,
-              shadowRadius: 10,
-            } : undefined}>
-              <Crown size={21} color={focused ? '#F59E0B' : color} strokeWidth={focused ? 2.5 : 1.8} />
             </View>
           ),
         }}

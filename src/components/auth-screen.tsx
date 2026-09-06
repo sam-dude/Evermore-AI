@@ -375,18 +375,6 @@ export function AuthScreen({ initialMode = 'signup', onBackToOnboarding }: AuthS
                   )}
                 </Text>
 
-                <TouchableOpacity
-                  onPress={() => openLegal('https://evermoreinnovation.site/')}
-                  activeOpacity={0.8}
-                  className="flex-row items-center justify-center py-1.5"
-                >
-                  <Text className="text-[11px] text-slate-400">
-                    Official Web Portal:{' '}
-                    <Text className="text-[#00E5FF] font-bold underline">
-                      evermoreinnovation.site
-                    </Text>
-                  </Text>
-                </TouchableOpacity>
               </View>
             )}
 
