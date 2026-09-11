@@ -5,6 +5,14 @@ import { StatusBar } from 'expo-status-bar';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {
+  useFonts,
+  PlusJakartaSans_400Regular,
+  PlusJakartaSans_500Medium,
+  PlusJakartaSans_600SemiBold,
+  PlusJakartaSans_700Bold,
+  PlusJakartaSans_800ExtraBold,
+} from '@expo-google-fonts/plus-jakarta-sans';
 import { AuthProvider, useAuth } from '@/context/auth-context';
 import { AuthScreen } from '@/components/auth-screen';
 import { OnboardingScreen } from '@/components/onboarding-screen';
@@ -21,6 +29,14 @@ function RootNavigator() {
   const [showOnboarding, setShowOnboarding] = useState<boolean | null>(null);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signup');
 
+  const [fontsLoaded] = useFonts({
+    PlusJakartaSans_400Regular,
+    PlusJakartaSans_500Medium,
+    PlusJakartaSans_600SemiBold,
+    PlusJakartaSans_700Bold,
+    PlusJakartaSans_800ExtraBold,
+  });
+
   useEffect(() => {
     checkOnboardingStatus();
   }, []);
@@ -36,7 +52,7 @@ function RootNavigator() {
 
   useEffect(() => {
     async function hideSplash() {
-      if (!isLoading && showOnboarding !== null) {
+      if (!isLoading && fontsLoaded && showOnboarding !== null) {
         try {
           await SplashScreen.hideAsync();
         } catch {
@@ -45,9 +61,9 @@ function RootNavigator() {
       }
     }
     hideSplash();
-  }, [isLoading, showOnboarding]);
+  }, [isLoading, fontsLoaded, showOnboarding]);
 
-  if (isLoading || showOnboarding === null) {
+  if (isLoading || !fontsLoaded || showOnboarding === null) {
     return (
       <View className="flex-1 bg-[#090D16] items-center justify-center">
         <ActivityIndicator size="large" color="#38BDF8" />

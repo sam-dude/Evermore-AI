@@ -28,6 +28,13 @@ module.exports = {
           cardHover: '#112240',
         },
       },
+      fontFamily: {
+        sans: ['PlusJakartaSans_400Regular', 'sans-serif'],
+        medium: ['PlusJakartaSans_500Medium', 'sans-serif'],
+        semibold: ['PlusJakartaSans_600SemiBold', 'sans-serif'],
+        bold: ['PlusJakartaSans_700Bold', 'sans-serif'],
+        extrabold: ['PlusJakartaSans_800ExtraBold', 'sans-serif'],
+      },
     },
   },
   plugins: [],

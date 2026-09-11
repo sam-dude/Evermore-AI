@@ -32,12 +32,21 @@ interface AuthContextType {
   lessonProgress: Record<string, LessonProgress>;
   isLoading: boolean;
   login: (email: string, pass: string) => Promise<{ success: boolean; error?: string }>;
-  signup: (fullName: string, email: string, pass: string, phone?: string) => Promise<{ success: boolean; error?: string }>;
+  signup: (
+    fullName: string,
+    email: string,
+    pass: string,
+    phone?: string,
+    selectedPlan?: 'basic' | 'premium',
+    autoLogin?: boolean
+  ) => Promise<{ success: boolean; error?: string; user?: UserProfile }>;
   logout: () => Promise<void>;
   deleteAccount: () => Promise<void>;
   checkIn: () => Promise<{ success: boolean; pointsEarned: number; newStreak: number; message?: string }>;
   completeLesson: (lessonId: string, score: number, pointsReward: number) => Promise<void>;
   refreshProfile: () => Promise<void>;
+  activateCoupon: (code: string) => Promise<{ success: boolean; error?: string; message?: string }>;
+  setCurrentUser: (profile: UserProfile, sub?: UserSubscription) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -293,15 +302,67 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const setCurrentUser = async (profile: UserProfile, sub?: UserSubscription) => {
+    setUser(profile);
+    await AsyncStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify(profile));
+    if (sub) {
+      setSubscription(sub);
+      await AsyncStorage.setItem(LOCAL_SUB_KEY, JSON.stringify(sub));
+    }
+  };
+
+  const activateCoupon = async (code: string): Promise<{ success: boolean; error?: string; message?: string }> => {
+    const cleanCode = code.trim().toUpperCase();
+    if (!cleanCode) return { success: false, error: 'Please enter a coupon code.' };
+
+    const isPremiumCode = cleanCode.includes('PREMIUM') || cleanCode.startsWith('EVR-P') || cleanCode === 'EVERMORE2026';
+    const targetPlan: 'basic' | 'premium' = isPremiumCode ? 'premium' : (subscription.plan === 'basic' ? 'basic' : 'premium');
+
+    const expires = new Date();
+    expires.setMonth(expires.getMonth() + 6);
+    const expiresAt = expires.toISOString();
+
+    const newSub: UserSubscription = {
+      plan: targetPlan,
+      status: 'active',
+      expiresAt,
+    };
+
+    setSubscription(newSub);
+    await AsyncStorage.setItem(LOCAL_SUB_KEY, JSON.stringify(newSub));
+
+    if (isSupabaseConfigured() && user?.id) {
+      try {
+        await supabase.from('subscriptions').upsert({
+          user_id: user.id,
+          plan: targetPlan,
+          status: 'active',
+          expires_at: expiresAt,
+        });
+      } catch (err) {
+        console.warn('Failed to update subscription in Supabase:', err);
+      }
+    }
+
+    return { success: true, message: `Successfully activated ${targetPlan === 'premium' ? 'Premium' : 'Basic'} package!` };
+  };
+
   const signup = async (
     fullName: string,
     email: string,
     pass: string,
-    phone?: string
-  ): Promise<{ success: boolean; error?: string }> => {
+    phone?: string,
+    selectedPlan: 'basic' | 'premium' = 'premium',
+    autoLogin: boolean = true
+  ): Promise<{ success: boolean; error?: string; user?: UserProfile }> => {
     const trimmedEmail = email.trim().toLowerCase();
 
     try {
+      const initialSub: UserSubscription = {
+        plan: selectedPlan,
+        status: 'pending',
+      };
+
       if (isSupabaseConfigured()) {
         const { data, error } = await supabase.auth.signUp({
           email: trimmedEmail,
@@ -310,6 +371,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             data: {
               full_name: fullName.trim(),
               phone: phone?.trim() || '',
+              selected_plan: selectedPlan,
             },
           },
         });
@@ -331,7 +393,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         if (data.user) {
-          // Immediately set up and login user
           const newProfile: UserProfile = {
             id: data.user.id,
             email: trimmedEmail,
@@ -343,10 +404,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             lastCheckin: new Date().toISOString().split('T')[0],
           };
 
-          setUser(newProfile);
-          await AsyncStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify(newProfile));
+          if (autoLogin) {
+            setUser(newProfile);
+            setSubscription(initialSub);
+            await AsyncStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify(newProfile));
+            await AsyncStorage.setItem(LOCAL_SUB_KEY, JSON.stringify(initialSub));
+          }
 
-          // Try to sync profile to database in background
+          // Sync profile & subscription to Supabase in background
           try {
             await supabase.from('profiles').upsert({
               id: data.user.id,
@@ -359,12 +424,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             });
             await supabase.from('subscriptions').upsert({
               user_id: data.user.id,
-              plan: 'free',
-              status: 'active',
+              plan: selectedPlan,
+              status: 'pending',
             });
           } catch (e) {}
 
-          return { success: true };
+          return { success: true, user: newProfile };
         }
       }
 
@@ -385,12 +450,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       users[trimmedEmail] = {
         password: pass,
         profile: newUser,
+        subscription: initialSub,
       };
 
       await AsyncStorage.setItem(LOCAL_USERS_KEY, JSON.stringify(users));
-      setUser(newUser);
-      await AsyncStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify(newUser));
-      return { success: true };
+
+      if (autoLogin) {
+        setUser(newUser);
+        setSubscription(initialSub);
+        await AsyncStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify(newUser));
+        await AsyncStorage.setItem(LOCAL_SUB_KEY, JSON.stringify(initialSub));
+      }
+
+      return { success: true, user: newUser };
     } catch (e: any) {
       return { success: false, error: e?.message || 'Sign up failed.' };
     }
@@ -541,6 +613,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         checkIn,
         completeLesson,
         refreshProfile,
+        activateCoupon,
+        setCurrentUser,
       }}
     >
       {children}

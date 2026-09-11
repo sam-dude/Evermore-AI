@@ -7,6 +7,12 @@
     "icon": "./assets/images/icon.png",
     "scheme": "evermoreai",
     "userInterfaceStyle": "automatic",
+    "updates": {
+      "url": "https://u.expo.dev/b815c0d3-fe9b-4a2a-bba4-d3b67bf3d38f"
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
     "ios": {
       "icon": "./assets/images/icon.png",
       "bundleIdentifier": "com.evermore.ai",
