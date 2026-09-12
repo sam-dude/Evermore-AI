@@ -77,28 +77,63 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     initAuth();
+
+    let authListener: { subscription: { unsubscribe: () => void } } | null = null;
+    if (isSupabaseConfigured()) {
+      const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
+        if (event === 'SIGNED_IN' && session?.user) {
+          await loadUserData(session.user.id, session.user.email || '', session.user);
+        } else if (event === 'SIGNED_OUT') {
+          setUser(null);
+          setIsGuest(true);
+          await AsyncStorage.removeItem(LOCAL_SESSION_KEY);
+          await AsyncStorage.setItem(LOCAL_GUEST_KEY, 'true');
+        }
+      });
+      authListener = data;
+    }
+
+    return () => {
+      authListener?.subscription?.unsubscribe();
+    };
   }, []);
 
   const initAuth = async () => {
     try {
+      // 1. ALWAYS load cached local user, subscription, and progress FIRST for immediate persistence
+      const [cachedUser, cachedSub, cachedProg, cachedGuest] = await Promise.all([
+        AsyncStorage.getItem(LOCAL_SESSION_KEY),
+        AsyncStorage.getItem(LOCAL_SUB_KEY),
+        AsyncStorage.getItem(LOCAL_PROGRESS_KEY),
+        AsyncStorage.getItem(LOCAL_GUEST_KEY),
+      ]);
+
+      if (cachedUser) {
+        try {
+          setUser(JSON.parse(cachedUser));
+        } catch {}
+      }
+      if (cachedSub) {
+        try {
+          setSubscription(JSON.parse(cachedSub));
+        } catch {}
+      }
+      if (cachedProg) {
+        try {
+          setLessonProgress(JSON.parse(cachedProg));
+        } catch {}
+      }
+      if (cachedGuest === 'true') {
+        setIsGuest(true);
+      }
+
+      // 2. If Supabase is configured, check online session to sync latest data
       if (isSupabaseConfigured()) {
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
           await loadUserData(session.user.id, session.user.email || '', session.user);
-          return;
         }
       }
-
-      // Local storage fallback
-      const cachedUser = await AsyncStorage.getItem(LOCAL_SESSION_KEY);
-      const cachedSub = await AsyncStorage.getItem(LOCAL_SUB_KEY);
-      const cachedProg = await AsyncStorage.getItem(LOCAL_PROGRESS_KEY);
-      const cachedGuest = await AsyncStorage.getItem(LOCAL_GUEST_KEY);
-
-      if (cachedUser) setUser(JSON.parse(cachedUser));
-      if (cachedSub) setSubscription(JSON.parse(cachedSub));
-      if (cachedProg) setLessonProgress(JSON.parse(cachedProg));
-      if (cachedGuest === 'true') setIsGuest(true);
     } catch (e) {
       console.warn('Auth init failed:', e);
     } finally {
@@ -595,8 +630,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const completeLesson = async (lessonId: string, score: number, pointsReward: number) => {
-    if (!user) return;
-
     const completedAt = new Date().toISOString();
     const newProgress: LessonProgress = {
       lessonId,
@@ -612,26 +645,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLessonProgress(updatedMap);
     await AsyncStorage.setItem(LOCAL_PROGRESS_KEY, JSON.stringify(updatedMap));
 
-    const isFirstTime = !lessonProgress[lessonId]?.completed;
-    if (isFirstTime) {
-      const updatedUser = {
-        ...user,
-        points: (user.points || 0) + pointsReward,
-      };
-      setUser(updatedUser);
-      await AsyncStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify(updatedUser));
+    if (user) {
+      const isFirstTime = !lessonProgress[lessonId]?.completed;
+      if (isFirstTime) {
+        const updatedUser = {
+          ...user,
+          points: (user.points || 0) + pointsReward,
+        };
+        setUser(updatedUser);
+        await AsyncStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify(updatedUser));
 
-      if (isSupabaseConfigured()) {
-        try {
-          await supabase.from('profiles').update({ points: updatedUser.points }).eq('id', user.id);
-          await supabase.from('lessons_progress').upsert({
-            user_id: user.id,
-            lesson_id: lessonId,
-            completed: true,
-            quiz_score: score,
-            completed_at: completedAt,
-          });
-        } catch (err) {}
+        if (isSupabaseConfigured()) {
+          try {
+            await supabase.from('profiles').update({ points: updatedUser.points }).eq('id', user.id);
+            await supabase.from('lessons_progress').upsert({
+              user_id: user.id,
+              lesson_id: lessonId,
+              completed: true,
+              quiz_score: score,
+              completed_at: completedAt,
+            });
+          } catch (err) {}
+        }
       }
     }
   };
