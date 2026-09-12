@@ -611,15 +611,15 @@ export function OnboardingScreen({ onFinish, onLoginPress }: OnboardingScreenPro
           <ArrowRight size={18} color="#040914" strokeWidth={2.5} style={{ marginLeft: 6 }} />
         </TouchableOpacity>
 
-        {/* Sign In Link */}
+        {/* Enter Platform Direct Link (No login on Android) */}
         <TouchableOpacity
-          onPress={onLoginPress}
+          onPress={onFinish}
           activeOpacity={0.7}
           style={{ alignItems: 'center', paddingVertical: 14 }}
         >
           <Text style={{ fontFamily: Fonts.regular, fontSize: 12.5, color: '#64748B' }}>
-            Already have an account?{' '}
-            <Text style={{ fontFamily: Fonts.bold, color: '#00E5FF' }}>Sign In</Text>
+            Ready to discover?{' '}
+            <Text style={{ fontFamily: Fonts.bold, color: '#00E5FF' }}>Enter Platform →</Text>
           </Text>
         </TouchableOpacity>
       </View>

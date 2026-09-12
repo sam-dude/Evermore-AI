@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Platform,
   Linking,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -27,7 +28,7 @@ const TELEGRAM_URL = 'https://t.me/evermoreai?text=evermore';
 
 export default function DashboardScreen() {
   const router = useRouter();
-  const { user, lessonProgress, checkIn } = useAuth();
+  const { user, lessonProgress, checkIn, openAuth } = useAuth();
   const [checkinLoading, setCheckinLoading] = useState(false);
   const [checkinAlert, setCheckinAlert] = useState<string | null>(null);
 
@@ -39,6 +40,17 @@ export default function DashboardScreen() {
   const hasCheckedInToday = user?.lastCheckin === todayStr;
 
   const handleCheckIn = async () => {
+    if (!user) {
+      Alert.alert(
+        'Account Required',
+        'Daily check-in streaks and EverPoints require an account. Would you like to sign in or create a free account to track your progress?',
+        [
+          { text: 'Later', style: 'cancel' },
+          { text: 'Sign In / Register', onPress: () => openAuth('signin') },
+        ]
+      );
+      return;
+    }
     setCheckinLoading(true);
     setCheckinAlert(null);
     try {

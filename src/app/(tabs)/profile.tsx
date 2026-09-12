@@ -30,7 +30,7 @@ const TERMS_URL = 'https://evermoreinnovation.site/terms.html';
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { user, subscription, logout, deleteAccount } = useAuth();
+  const { user, subscription, logout, deleteAccount, openAuth } = useAuth();
 
   const handleOpenLink = async (url: string) => {
     try {
@@ -86,70 +86,110 @@ export default function ProfileScreen() {
           </Text>
         </View>
 
-        {/* ── USER CARD ── */}
-        <View
-          className="bg-evermore-surface border border-evermore-border rounded-3xl p-5 mb-5"
-          style={{
-            shadowColor: '#00E5FF',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.06,
-            shadowRadius: 16,
-          }}
-        >
-          <View className="flex-row items-center mb-4">
-            <View
-              className="w-14 h-14 rounded-2xl bg-evermore-cyan/10 border border-evermore-cyan/20 items-center justify-center mr-3.5"
-              style={{
-                shadowColor: '#00E5FF',
-                shadowOffset: { width: 0, height: 0 },
-                shadowOpacity: 0.25,
-                shadowRadius: 10,
-              }}
-            >
-              <UserIcon size={26} color="#00E5FF" strokeWidth={2} />
+        {/* ── GUEST OR LOGGED-IN USER CARD ── */}
+        {!user ? (
+          <View
+            className="bg-evermore-surface border border-cyan-500/30 rounded-3xl p-5 mb-5"
+            style={{
+              shadowColor: '#00E5FF',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.12,
+              shadowRadius: 16,
+            }}
+          >
+            <View className="flex-row items-center mb-3">
+              <View className="w-12 h-12 rounded-2xl bg-cyan-500/15 border border-cyan-500/30 items-center justify-center mr-3">
+                <UserIcon size={24} color="#00E5FF" />
+              </View>
+              <View className="flex-1">
+                <Text className="text-base font-extrabold text-white">
+                  Guest Explorer
+                </Text>
+                <Text className="text-xs text-slate-400 mt-0.5">
+                  Exploring curriculum in Guest Mode
+                </Text>
+              </View>
             </View>
-            <View className="flex-1">
-              <Text className="text-base font-extrabold text-white" numberOfLines={1}>
-                {user?.fullName || 'Evermore Member'}
+
+            <Text className="text-xs text-slate-300 leading-relaxed mb-4">
+              Sign in or create a free learner account to track daily streaks, earn EverPoints, and sync your study progress across devices.
+            </Text>
+
+            <TouchableOpacity
+              onPress={() => openAuth('signin')}
+              activeOpacity={0.8}
+              className="bg-evermore-cyan py-3.5 px-4 rounded-2xl items-center justify-center"
+            >
+              <Text className="text-xs font-black text-slate-950 uppercase tracking-wider">
+                Sign In or Register
               </Text>
-              <Text className="text-xs text-slate-400 mt-0.5" numberOfLines={1}>
-                {user?.email || ''}
-              </Text>
-              <View className="flex-row items-center mt-1.5">
-                <View className="bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full mr-2">
-                  <Text className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
-                    Learner Account
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View
+            className="bg-evermore-surface border border-evermore-border rounded-3xl p-5 mb-5"
+            style={{
+              shadowColor: '#00E5FF',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.06,
+              shadowRadius: 16,
+            }}
+          >
+            <View className="flex-row items-center mb-4">
+              <View
+                className="w-14 h-14 rounded-2xl bg-evermore-cyan/10 border border-evermore-cyan/20 items-center justify-center mr-3.5"
+                style={{
+                  shadowColor: '#00E5FF',
+                  shadowOffset: { width: 0, height: 0 },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 10,
+                }}
+              >
+                <UserIcon size={26} color="#00E5FF" strokeWidth={2} />
+              </View>
+              <View className="flex-1">
+                <Text className="text-base font-extrabold text-white" numberOfLines={1}>
+                  {user.fullName || 'Evermore Member'}
+                </Text>
+                <Text className="text-xs text-slate-400 mt-0.5" numberOfLines={1}>
+                  {user.email || ''}
+                </Text>
+                <View className="flex-row items-center mt-1.5">
+                  <View className="bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full mr-2">
+                    <Text className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
+                      Learner Account
+                    </Text>
+                  </View>
+                  {user.country && (
+                    <Text className="text-[11px] text-slate-500">Region: {user.country}</Text>
+                  )}
+                </View>
+              </View>
+            </View>
+
+            {/* Stats Bar */}
+            <View className="flex-row bg-evermore-bg rounded-2xl p-3.5 border border-slate-800/80">
+              <View className="flex-1 items-center border-r border-slate-800">
+                <View className="flex-row items-center">
+                  <Sparkles size={14} color="#00E5FF" />
+                  <Text className="text-base font-black text-white ml-1.5">
+                    {user.points || 0}
                   </Text>
                 </View>
-                {user?.country && (
-                  <Text className="text-[11px] text-slate-500">Region: {user.country}</Text>
-                )}
+                <Text className="text-[10px] font-semibold text-slate-500 mt-0.5">EverPoints</Text>
+              </View>
+              <View className="flex-1 items-center">
+                <View className="flex-row items-center">
+                  <Flame size={14} color="#F59E0B" />
+                  <Text className="text-base font-black text-white ml-1.5">
+                    {user.streak || 0} Days
+                  </Text>
+                </View>
+                <Text className="text-[10px] font-semibold text-slate-500 mt-0.5">Active Streak</Text>
               </View>
             </View>
           </View>
-
-          {/* Stats Bar */}
-          <View className="flex-row bg-evermore-bg rounded-2xl p-3.5 border border-slate-800/80">
-            <View className="flex-1 items-center border-r border-slate-800">
-              <View className="flex-row items-center">
-                <Sparkles size={14} color="#00E5FF" />
-                <Text className="text-base font-black text-white ml-1.5">
-                  {user?.points || 0}
-                </Text>
-              </View>
-              <Text className="text-[10px] font-semibold text-slate-500 mt-0.5">EverPoints</Text>
-            </View>
-            <View className="flex-1 items-center">
-              <View className="flex-row items-center">
-                <Flame size={14} color="#F59E0B" />
-                <Text className="text-base font-black text-white ml-1.5">
-                  {user?.streak || 0} Days
-                </Text>
-              </View>
-              <Text className="text-[10px] font-semibold text-slate-500 mt-0.5">Active Streak</Text>
-            </View>
-          </View>
-        </View>
+        )}
 
         {/* ── SETTINGS GROUP: COMMUNITY & SUPPORT ── */}
         <View className="bg-evermore-surface border border-evermore-border rounded-3xl p-4 mb-5">
@@ -225,26 +265,29 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* ── SIGN OUT BUTTON ── */}
-        <TouchableOpacity
-          onPress={handleLogout}
-          activeOpacity={0.8}
-          className="bg-rose-500/8 border border-rose-500/20 py-3.5 rounded-2xl flex-row items-center justify-center mb-3"
-        >
-          <LogOut size={16} color="#F43F5E" />
-          <Text className="text-xs font-bold text-rose-400 ml-2">Sign Out</Text>
-        </TouchableOpacity>
+        {/* ── SIGN OUT & ACCOUNT DELETION (For Logged In Users) ── */}
+        {user && (
+          <>
+            <TouchableOpacity
+              onPress={handleLogout}
+              activeOpacity={0.8}
+              className="bg-rose-500/8 border border-rose-500/20 py-3.5 rounded-2xl flex-row items-center justify-center mb-3"
+            >
+              <LogOut size={16} color="#F43F5E" />
+              <Text className="text-xs font-bold text-rose-400 ml-2">Sign Out</Text>
+            </TouchableOpacity>
 
-        {/* ── ACCOUNT DELETION (Apple Guideline 5.1.1(v) Compliant) ── */}
-        <TouchableOpacity
-          onPress={handleDeleteAccount}
-          activeOpacity={0.7}
-          className="py-2.5 items-center justify-center mb-5"
-        >
-          <Text className="text-xs text-slate-500 font-medium underline">
-            Delete Account &amp; All Data
-          </Text>
-        </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleDeleteAccount}
+              activeOpacity={0.7}
+              className="py-2.5 items-center justify-center mb-5"
+            >
+              <Text className="text-xs text-slate-500 font-medium underline">
+                Delete Account &amp; All Data
+              </Text>
+            </TouchableOpacity>
+          </>
+        )}
 
         <Text className="text-[11px] text-slate-600 text-center">
           Evermore AI v1.0.0

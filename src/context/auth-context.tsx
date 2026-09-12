@@ -31,6 +31,12 @@ interface AuthContextType {
   subscription: UserSubscription;
   lessonProgress: Record<string, LessonProgress>;
   isLoading: boolean;
+  isGuest: boolean;
+  showAuthModal: boolean;
+  authModalMode: 'signin' | 'signup';
+  continueAsGuest: () => Promise<void>;
+  openAuth: (mode?: 'signin' | 'signup') => void;
+  closeAuth: () => void;
   login: (email: string, pass: string) => Promise<{ success: boolean; error?: string }>;
   signup: (
     fullName: string,
@@ -55,6 +61,7 @@ const LOCAL_SESSION_KEY = '@evermore_user_profile';
 const LOCAL_SUB_KEY = '@evermore_user_subscription';
 const LOCAL_PROGRESS_KEY = '@evermore_lesson_progress';
 const LOCAL_USERS_KEY = '@evermore_offline_users';
+const LOCAL_GUEST_KEY = '@evermore_is_guest';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
@@ -64,6 +71,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   });
   const [lessonProgress, setLessonProgress] = useState<Record<string, LessonProgress>>({});
   const [isLoading, setIsLoading] = useState(true);
+  const [isGuest, setIsGuest] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState<'signin' | 'signup'>('signin');
 
   useEffect(() => {
     initAuth();
@@ -83,15 +93,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const cachedUser = await AsyncStorage.getItem(LOCAL_SESSION_KEY);
       const cachedSub = await AsyncStorage.getItem(LOCAL_SUB_KEY);
       const cachedProg = await AsyncStorage.getItem(LOCAL_PROGRESS_KEY);
+      const cachedGuest = await AsyncStorage.getItem(LOCAL_GUEST_KEY);
 
       if (cachedUser) setUser(JSON.parse(cachedUser));
       if (cachedSub) setSubscription(JSON.parse(cachedSub));
       if (cachedProg) setLessonProgress(JSON.parse(cachedProg));
+      if (cachedGuest === 'true') setIsGuest(true);
     } catch (e) {
       console.warn('Auth init failed:', e);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const continueAsGuest = async () => {
+    setIsGuest(true);
+    setShowAuthModal(false);
+    await AsyncStorage.setItem(LOCAL_GUEST_KEY, 'true');
+  };
+
+  const openAuth = (mode: 'signin' | 'signup' = 'signin') => {
+    setAuthModalMode(mode);
+    setShowAuthModal(true);
+  };
+
+  const closeAuth = () => {
+    setShowAuthModal(false);
+  };
+
+  const onLoginSuccess = async () => {
+    setIsGuest(false);
+    setShowAuthModal(false);
+    await AsyncStorage.removeItem(LOCAL_GUEST_KEY);
   };
 
   const loadUserData = async (userId: string, email: string, authUser?: any) => {
@@ -245,6 +278,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await AsyncStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify(demoUser));
       await AsyncStorage.setItem(LOCAL_SUB_KEY, JSON.stringify(demoSub));
       await AsyncStorage.setItem(LOCAL_PROGRESS_KEY, JSON.stringify(demoProg));
+      await onLoginSuccess();
       return { success: true };
     }
 
@@ -270,6 +304,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (users[trimmedEmail] && users[trimmedEmail].password === pass) {
             setUser(users[trimmedEmail].profile);
             await AsyncStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify(users[trimmedEmail].profile));
+            await onLoginSuccess();
             return { success: true };
           }
 
@@ -278,6 +313,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (data.user) {
           await loadUserData(data.user.id, data.user.email || trimmedEmail, data.user);
+          await onLoginSuccess();
           return { success: true };
         }
       }
@@ -291,6 +327,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const loaded = users[trimmedEmail].profile;
           setUser(loaded);
           await AsyncStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify(loaded));
+          await onLoginSuccess();
           return { success: true };
         }
         return { success: false, error: 'Incorrect password.' };
@@ -409,6 +446,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setSubscription(initialSub);
             await AsyncStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify(newProfile));
             await AsyncStorage.setItem(LOCAL_SUB_KEY, JSON.stringify(initialSub));
+            await onLoginSuccess();
           }
 
           // Sync profile & subscription to Supabase in background
@@ -460,6 +498,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setSubscription(initialSub);
         await AsyncStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify(newUser));
         await AsyncStorage.setItem(LOCAL_SUB_KEY, JSON.stringify(initialSub));
+        await onLoginSuccess();
       }
 
       return { success: true, user: newUser };
@@ -477,6 +516,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     setSubscription({ plan: 'free', status: 'active' });
     setLessonProgress({});
+    setIsGuest(true);
+    await AsyncStorage.setItem(LOCAL_GUEST_KEY, 'true');
     await AsyncStorage.removeItem(LOCAL_SESSION_KEY);
     await AsyncStorage.removeItem(LOCAL_SUB_KEY);
     await AsyncStorage.removeItem(LOCAL_PROGRESS_KEY);
@@ -510,6 +551,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     setSubscription({ plan: 'free', status: 'active' });
     setLessonProgress({});
+    setIsGuest(true);
+    await AsyncStorage.setItem(LOCAL_GUEST_KEY, 'true');
     await AsyncStorage.removeItem(LOCAL_SESSION_KEY);
     await AsyncStorage.removeItem(LOCAL_SUB_KEY);
     await AsyncStorage.removeItem(LOCAL_PROGRESS_KEY);
@@ -606,6 +649,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         subscription,
         lessonProgress,
         isLoading,
+        isGuest,
+        showAuthModal,
+        authModalMode,
+        continueAsGuest,
+        openAuth,
+        closeAuth,
         login,
         signup,
         logout,

@@ -13,27 +13,34 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as WebBrowser from 'expo-web-browser';
-import { Lock, Mail, User as UserIcon, Phone, ArrowLeft, Check, Globe } from 'lucide-react-native';
+import { Lock, Mail, User as UserIcon, ArrowLeft, Check, Globe } from 'lucide-react-native';
 import { useAuth } from '@/context/auth-context';
 import { GradientButton } from '@/components/gradient-button';
 
 interface AuthScreenProps {
   initialMode?: 'signin' | 'signup';
   onBackToOnboarding?: () => void;
+  onContinueAsGuest?: () => void | Promise<void>;
 }
 
-export function AuthScreen({ initialMode = 'signup', onBackToOnboarding }: AuthScreenProps) {
-  const { login, signup } = useAuth();
+export function AuthScreen({ initialMode = 'signup', onBackToOnboarding, onContinueAsGuest }: AuthScreenProps) {
+  const { login, signup, continueAsGuest } = useAuth();
   const [isSignUp, setIsSignUp] = useState(initialMode === 'signup');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
   const [country, setCountry] = useState('Nigeria');
   const [password, setPassword] = useState('');
-  const [selectedPlan, setSelectedPlan] = useState<'basic' | 'premium'>('basic');
   const [agreedToTerms, setAgreedToTerms] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const handleContinueAsGuest = async () => {
+    if (onContinueAsGuest) {
+      onContinueAsGuest();
+    } else {
+      await continueAsGuest();
+    }
+  };
 
   const handleAuth = async () => {
     if (!email.trim() || !password.trim()) {
@@ -56,7 +63,7 @@ export function AuthScreen({ initialMode = 'signup', onBackToOnboarding }: AuthS
 
     try {
       if (isSignUp) {
-        const res = await signup(fullName, email, password, phone);
+        const res = await signup(fullName, email, password);
         if (!res.success) setError(res.error || 'Failed to create account.');
       } else {
         const res = await login(email, password);
@@ -185,26 +192,6 @@ export function AuthScreen({ initialMode = 'signup', onBackToOnboarding }: AuthS
               </View>
             )}
 
-            {/* Phone Number (if signup) */}
-            {isSignUp && (
-              <View>
-                <Text className="text-[11px] font-bold text-[#00F5A0] uppercase tracking-wider mb-1.5 pl-1">
-                  Phone Number
-                </Text>
-                <View className="flex-row items-center bg-[#0C1726] border border-[#172A46] rounded-2xl px-4 py-3.5">
-                  <Phone size={18} color="#64748B" />
-                  <TextInput
-                    placeholder="+234 800 000 0000"
-                    placeholderTextColor="#475569"
-                    value={phone}
-                    onChangeText={setPhone}
-                    keyboardType="phone-pad"
-                    className="flex-1 ml-3 text-sm text-white"
-                  />
-                </View>
-              </View>
-            )}
-
             {/* Country (if signup) */}
             {isSignUp && (
               <View>
@@ -242,74 +229,7 @@ export function AuthScreen({ initialMode = 'signup', onBackToOnboarding }: AuthS
               </View>
             </View>
 
-            {/* ── REGISTRATION PACKAGE CARDS (NON-IOS ONLY TO PASS APPLE REVIEW) ── */}
-            {isSignUp && Platform.OS !== 'ios' && (
-              <View className="mt-2">
-                <Text className="text-[12px] font-bold text-[#00F5A0] uppercase tracking-wider mb-2.5 pl-1">
-                  Registration Package:
-                </Text>
-
-                {/* Basic Plan */}
-                <TouchableOpacity
-                  onPress={() => setSelectedPlan('basic')}
-                  activeOpacity={0.8}
-                  className="rounded-2xl p-4 mb-3 border bg-[#0C1726]"
-                  style={{
-                    borderColor: selectedPlan === 'basic' ? '#00F5A0' : '#172A46',
-                    shadowColor: selectedPlan === 'basic' ? '#00F5A0' : 'transparent',
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.15,
-                    shadowRadius: 10,
-                  }}
-                >
-                  <View className="flex-row items-center justify-between mb-1">
-                    <Text className="text-base font-extrabold text-white">Basic Plan</Text>
-                    {selectedPlan === 'basic' && (
-                      <View className="w-5 h-5 rounded-full bg-[#00F5A0] items-center justify-center">
-                        <Check size={12} color="#050B14" strokeWidth={3} />
-                      </View>
-                    )}
-                  </View>
-                  <Text className="text-lg font-black text-[#00F5A0] mb-0.5">
-                    ₦7,000
-                  </Text>
-                  <Text className="text-xs text-slate-400">
-                    Start your Evermore journey.
-                  </Text>
-                </TouchableOpacity>
-
-                {/* Premium Plan */}
-                <TouchableOpacity
-                  onPress={() => setSelectedPlan('premium')}
-                  activeOpacity={0.8}
-                  className="rounded-2xl p-4 mb-3 border bg-[#0C1726]"
-                  style={{
-                    borderColor: selectedPlan === 'premium' ? '#00E5FF' : '#172A46',
-                    shadowColor: selectedPlan === 'premium' ? '#00E5FF' : 'transparent',
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.2,
-                    shadowRadius: 10,
-                  }}
-                >
-                  <View className="flex-row items-center justify-between mb-1">
-                    <Text className="text-base font-extrabold text-white">Premium Plan</Text>
-                    {selectedPlan === 'premium' && (
-                      <View className="w-5 h-5 rounded-full bg-[#00E5FF] items-center justify-center">
-                        <Check size={12} color="#050B14" strokeWidth={3} />
-                      </View>
-                    )}
-                  </View>
-                  <Text className="text-lg font-black text-[#00E5FF] mb-0.5">
-                    ₦14,000
-                  </Text>
-                  <Text className="text-xs text-slate-400">
-                    Unlock the higher plan experience.
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            )}
-
-            {/* Terms Checkbox (All Platforms) */}
+            {/* Terms Checkbox */}
             {isSignUp && (
               <TouchableOpacity
                 onPress={() => setAgreedToTerms(!agreedToTerms)}
@@ -347,6 +267,17 @@ export function AuthScreen({ initialMode = 'signup', onBackToOnboarding }: AuthS
                 textStyle={{ fontSize: 13, fontWeight: '900', letterSpacing: 1 }}
               />
             </View>
+
+            {/* ── CONTINUE AS GUEST BUTTON (Apple Guideline 5.1.1(v) Compliant) ── */}
+            <TouchableOpacity
+              onPress={handleContinueAsGuest}
+              activeOpacity={0.8}
+              className="mt-3 py-3.5 rounded-2xl border border-slate-700/80 bg-slate-800/40 items-center justify-center"
+            >
+              <Text className="text-xs font-bold text-slate-300">
+                Explore Lessons as Guest (No Account Required) →
+              </Text>
+            </TouchableOpacity>
 
             {/* ── FOOTER HELP TEXT ── */}
             {isSignUp && (

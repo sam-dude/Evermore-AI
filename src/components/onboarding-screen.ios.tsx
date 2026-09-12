@@ -13,9 +13,10 @@ import { GradientButton } from '@/components/gradient-button';
 interface OnboardingScreenProps {
   onFinish: () => void;
   onLoginPress: () => void;
+  onGuestPress?: () => void;
 }
 
-export function OnboardingScreen({ onFinish, onLoginPress }: OnboardingScreenProps) {
+export function OnboardingScreen({ onFinish, onLoginPress, onGuestPress }: OnboardingScreenProps) {
   const openLegal = async (url: string) => {
     try {
       await WebBrowser.openBrowserAsync(url, { toolbarColor: '#050B14' });
@@ -94,13 +95,13 @@ export function OnboardingScreen({ onFinish, onLoginPress }: OnboardingScreenPro
 
             {/* Subtitle */}
             <Text className="text-xs sm:text-sm text-slate-300 text-center leading-relaxed mb-8 px-1">
-              Create your account to access bite-sized AI curriculum modules, retention quizzes, daily knowledge streaks, and student study community discussions.
+              Access bite-sized AI curriculum modules, retention quizzes, daily knowledge streaks, and student study community discussions.
             </Text>
 
             {/* Main Action Button */}
             <GradientButton
               title="START LEARNING NOW"
-              onPress={onFinish}
+              onPress={onGuestPress || onFinish}
               size="lg"
               textStyle={{ fontSize: 13, fontWeight: '900', letterSpacing: 1 }}
             />
@@ -110,11 +111,22 @@ export function OnboardingScreen({ onFinish, onLoginPress }: OnboardingScreenPro
           <TouchableOpacity
             onPress={onLoginPress}
             activeOpacity={0.75}
-            className="items-center py-3 mt-3"
+            className="items-center py-2.5 mt-3"
           >
             <Text className="text-xs text-slate-400">
               Already have an account?{' '}
               <Text className="text-[#00E5FF] font-bold">Sign In</Text>
+            </Text>
+          </TouchableOpacity>
+
+          {/* Guest Link */}
+          <TouchableOpacity
+            onPress={onGuestPress || onFinish}
+            activeOpacity={0.75}
+            className="items-center py-1 mt-0.5"
+          >
+            <Text className="text-xs text-slate-400 font-medium">
+              or <Text className="text-slate-300 underline font-semibold">Explore as Guest (No Account Required) →</Text>
             </Text>
           </TouchableOpacity>
         </View>

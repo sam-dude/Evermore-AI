@@ -1,6 +1,6 @@
 import '../global.css';
 import React, { useEffect, useState } from 'react';
-import { View, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator, Platform, Modal } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -25,9 +25,18 @@ try {
 const ONBOARDING_SEEN_KEY = '@evermore_has_seen_onboarding';
 
 function RootNavigator() {
-  const { user, isLoading } = useAuth();
+  const {
+    user,
+    isLoading,
+    isGuest,
+    continueAsGuest,
+    showAuthModal,
+    authModalMode,
+    closeAuth,
+  } = useAuth();
   const [showOnboarding, setShowOnboarding] = useState<boolean | null>(null);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signup');
+  const [androidFinishedOnboarding, setAndroidFinishedOnboarding] = useState(false);
 
   const [fontsLoaded] = useFonts({
     PlusJakartaSans_400Regular,
@@ -71,13 +80,22 @@ function RootNavigator() {
     );
   }
 
-  // 1. If logged in, go straight to main app tabs
-  if (user) {
+  // ── ANDROID SPECIFIC FLOW: Always show onboarding -> Home (no login wall) ──
+  if (Platform.OS === 'android') {
+    if (!androidFinishedOnboarding) {
+      return (
+        <OnboardingScreen
+          onFinish={() => setAndroidFinishedOnboarding(true)}
+          onLoginPress={() => setAndroidFinishedOnboarding(true)}
+        />
+      );
+    }
+
     return (
       <Stack
         screenOptions={{
           headerShown: false,
-          contentStyle: { backgroundColor: '#090D16' },
+          contentStyle: { backgroundColor: '#050B14' },
           animation: 'fade',
         }}
       >
@@ -93,29 +111,72 @@ function RootNavigator() {
     );
   }
 
-  // 2. If onboarding not completed yet, show onboarding carousel
+  // ── IOS FLOW: Authenticated or Guest (Guideline 5.1.1(v) Compliant) ──
+  // 1. If logged in or in guest exploration mode, allow direct access to non-account features
+  if (user || isGuest) {
+    return (
+      <View style={{ flex: 1, backgroundColor: '#090D16' }}>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: '#090D16' },
+            animation: 'fade',
+          }}
+        >
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="lesson/[id]"
+            options={{
+              headerShown: false,
+              animation: 'slide_from_right',
+            }}
+          />
+        </Stack>
+
+        {/* Auth modal when guest user chooses to sign in or register inside the app */}
+        <Modal
+          visible={showAuthModal}
+          animationType="slide"
+          presentationStyle="fullScreen"
+          onRequestClose={closeAuth}
+        >
+          <AuthScreen
+            initialMode={authModalMode}
+            onBackToOnboarding={closeAuth}
+            onContinueAsGuest={closeAuth}
+          />
+        </Modal>
+      </View>
+    );
+  }
+
+  // 2. If onboarding not completed yet, show onboarding carousel with direct guest exploration
   if (showOnboarding) {
     return (
       <OnboardingScreen
         onFinish={async () => {
           await AsyncStorage.setItem(ONBOARDING_SEEN_KEY, 'true');
-          setAuthMode('signup');
-          setShowOnboarding(false);
+          await continueAsGuest();
         }}
         onLoginPress={async () => {
           await AsyncStorage.setItem(ONBOARDING_SEEN_KEY, 'true');
           setAuthMode('signin');
           setShowOnboarding(false);
         }}
+        onGuestPress={async () => {
+          await AsyncStorage.setItem(ONBOARDING_SEEN_KEY, 'true');
+          await continueAsGuest();
+        }}
       />
     );
   }
 
-  // 3. Otherwise show auth screen (with option to see onboarding again)
+  // 3. Otherwise show auth screen (with option to explore as guest)
   return (
     <AuthScreen
       initialMode={authMode}
       onBackToOnboarding={() => setShowOnboarding(true)}
+      onContinueAsGuest={() => continueAsGuest()}
     />
   );
 }

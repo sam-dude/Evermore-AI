@@ -6,6 +6,7 @@ import { OnboardingScreen as IOSOnboarding } from './onboarding-screen.ios';
 interface OnboardingScreenProps {
   onFinish: () => void;
   onLoginPress: () => void;
+  onGuestPress?: () => void;
 }
 
 export function OnboardingScreen(props: OnboardingScreenProps) {

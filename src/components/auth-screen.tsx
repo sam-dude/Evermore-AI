@@ -6,6 +6,7 @@ import { AuthScreen as IOSAuthScreen } from './auth-screen.ios';
 interface AuthScreenProps {
   initialMode?: 'signin' | 'signup';
   onBackToOnboarding?: () => void;
+  onContinueAsGuest?: () => void | Promise<void>;
 }
 
 export function AuthScreen(props: AuthScreenProps) {
