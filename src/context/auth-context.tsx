@@ -100,7 +100,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const initAuth = async () => {
     try {
-      // 1. ALWAYS load cached local user, subscription, and progress FIRST for immediate persistence
+      // 1. ALWAYS load cached local user, subscription, and progress FIRST for immediate offline/instant persistence
       const [cachedUser, cachedSub, cachedProg, cachedGuest] = await Promise.all([
         AsyncStorage.getItem(LOCAL_SESSION_KEY),
         AsyncStorage.getItem(LOCAL_SUB_KEY),
@@ -108,22 +108,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         AsyncStorage.getItem(LOCAL_GUEST_KEY),
       ]);
 
+      let hasLoggedInUser = false;
       if (cachedUser) {
         try {
-          setUser(JSON.parse(cachedUser));
+          const parsed = JSON.parse(cachedUser);
+          if (parsed && parsed.id) {
+            setUser(parsed);
+            hasLoggedInUser = true;
+            setIsGuest(false);
+          }
         } catch {}
       }
+
       if (cachedSub) {
         try {
           setSubscription(JSON.parse(cachedSub));
         } catch {}
       }
+
       if (cachedProg) {
         try {
           setLessonProgress(JSON.parse(cachedProg));
         } catch {}
       }
-      if (cachedGuest === 'true') {
+
+      if (!hasLoggedInUser && cachedGuest === 'true') {
         setIsGuest(true);
       }
 
@@ -131,6 +140,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (isSupabaseConfigured()) {
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
+          setIsGuest(false);
+          await AsyncStorage.removeItem(LOCAL_GUEST_KEY);
           await loadUserData(session.user.id, session.user.email || '', session.user);
         }
       }
@@ -164,6 +175,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const loadUserData = async (userId: string, email: string, authUser?: any) => {
     try {
+      // Load current cached local profile to preserve points/streak across offline/online transitions
+      let localProfile: UserProfile | null = null;
+      try {
+        const rawLocal = await AsyncStorage.getItem(LOCAL_SESSION_KEY);
+        if (rawLocal) {
+          localProfile = JSON.parse(rawLocal);
+        }
+      } catch {}
+
       let loadedProfile: UserProfile | null = null;
 
       if (isSupabaseConfigured()) {
@@ -173,37 +193,57 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             .from('profiles')
             .select('*')
             .eq('id', userId)
-            .single();
+            .maybeSingle();
 
           if (profile) {
+            // Keep the higher of remote or local offline points/streak to prevent progress loss
+            const resolvedPoints = Math.max(profile.points ?? 0, localProfile?.points ?? 0, 50);
+            const resolvedStreak = Math.max(profile.streak ?? 1, localProfile?.streak ?? 1, 1);
+            const resolvedLastCheckin = profile.last_checkin || localProfile?.lastCheckin || new Date().toISOString().split('T')[0];
+
             loadedProfile = {
               id: profile.id,
               email: email,
-              fullName: profile.full_name || authUser?.user_metadata?.full_name || 'Evermore Member',
-              phone: profile.phone || authUser?.user_metadata?.phone,
-              country: profile.country || 'NG',
-              points: profile.points ?? 50,
-              streak: profile.streak ?? 1,
-              lastCheckin: profile.last_checkin || new Date().toISOString().split('T')[0],
+              fullName: profile.full_name || localProfile?.fullName || authUser?.user_metadata?.full_name || 'Evermore Member',
+              phone: profile.phone || localProfile?.phone || authUser?.user_metadata?.phone,
+              country: profile.country || localProfile?.country || 'NG',
+              points: resolvedPoints,
+              streak: resolvedStreak,
+              lastCheckin: resolvedLastCheckin,
             };
+
+            // If local points were higher, sync to Supabase in background
+            if (resolvedPoints > (profile.points ?? 0) || resolvedStreak > (profile.streak ?? 0)) {
+              Promise.resolve(
+                supabase.from('profiles').update({
+                  points: resolvedPoints,
+                  streak: resolvedStreak,
+                  last_checkin: resolvedLastCheckin,
+                }).eq('id', userId)
+              ).catch(() => {});
+            }
           }
         } catch (dbErr) {
           console.warn('Profiles table query error:', dbErr);
         }
 
-        // 2. If profile table doesn't exist yet or is empty, construct fallback from auth metadata
+        // 2. Fallback: if remote profile query returned null, preserve existing local profile or initialize
         if (!loadedProfile) {
-          const nameFromMeta = authUser?.user_metadata?.full_name || email.split('@')[0] || 'Evermore Member';
-          loadedProfile = {
-            id: userId,
-            email: email,
-            fullName: nameFromMeta,
-            phone: authUser?.user_metadata?.phone,
-            country: 'NG',
-            points: 50,
-            streak: 1,
-            lastCheckin: new Date().toISOString().split('T')[0],
-          };
+          if (localProfile && (localProfile.id === userId || localProfile.email === email)) {
+            loadedProfile = localProfile;
+          } else {
+            const nameFromMeta = authUser?.user_metadata?.full_name || email.split('@')[0] || 'Evermore Member';
+            loadedProfile = {
+              id: userId,
+              email: email,
+              fullName: nameFromMeta,
+              phone: authUser?.user_metadata?.phone,
+              country: 'NG',
+              points: 50,
+              streak: 1,
+              lastCheckin: new Date().toISOString().split('T')[0],
+            };
+          }
 
           // Try to upsert so profile exists in DB
           try {
@@ -212,8 +252,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               full_name: loadedProfile.fullName,
               phone: loadedProfile.phone,
               country: 'NG',
-              points: 50,
-              streak: 1,
+              points: loadedProfile.points,
+              streak: loadedProfile.streak,
               last_checkin: loadedProfile.lastCheckin,
             });
           } catch (e) {}
@@ -230,7 +270,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             .eq('user_id', userId)
             .order('started_at', { ascending: false })
             .limit(1)
-            .single();
+            .maybeSingle();
 
           if (sub) {
             const subData: UserSubscription = {
@@ -240,33 +280,60 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             };
             setSubscription(subData);
             await AsyncStorage.setItem(LOCAL_SUB_KEY, JSON.stringify(subData));
+          } else {
+            const rawCachedSub = await AsyncStorage.getItem(LOCAL_SUB_KEY);
+            if (rawCachedSub) {
+              setSubscription(JSON.parse(rawCachedSub));
+            }
           }
         } catch (subErr) {}
 
-        // 4. Fetch progress
+        // 4. Fetch and merge lesson progress (offline-first sync)
         try {
+          let localProgMap: Record<string, LessonProgress> = {};
+          try {
+            const rawProg = await AsyncStorage.getItem(LOCAL_PROGRESS_KEY);
+            if (rawProg) {
+              localProgMap = JSON.parse(rawProg);
+            }
+          } catch {}
+
           const { data: progressList } = await supabase
             .from('lessons_progress')
             .select('*')
             .eq('user_id', userId);
 
+          const mergedMap: Record<string, LessonProgress> = { ...localProgMap };
+
           if (progressList && progressList.length > 0) {
-            const map: Record<string, LessonProgress> = {};
             progressList.forEach((p: any) => {
-              map[p.lesson_id] = {
+              mergedMap[p.lesson_id] = {
                 lessonId: p.lesson_id,
-                completed: p.completed,
-                quizScore: p.quiz_score,
-                completedAt: p.completed_at,
+                completed: p.completed ?? true,
+                quizScore: p.quiz_score ?? 100,
+                completedAt: p.completed_at || new Date().toISOString(),
               };
             });
-            setLessonProgress(map);
-            await AsyncStorage.setItem(LOCAL_PROGRESS_KEY, JSON.stringify(map));
           }
+
+          // If local has progress missing in Supabase, push it up
+          if (Object.keys(localProgMap).length > 0) {
+            const rows = Object.values(localProgMap).map((item) => ({
+              user_id: userId,
+              lesson_id: item.lessonId,
+              completed: item.completed,
+              quiz_score: item.quizScore,
+              completed_at: item.completedAt,
+            }));
+            Promise.resolve(supabase.from('lessons_progress').upsert(rows)).catch(() => {});
+          }
+
+          setLessonProgress(mergedMap);
+          await AsyncStorage.setItem(LOCAL_PROGRESS_KEY, JSON.stringify(mergedMap));
         } catch (progErr) {}
       } else {
         // Fallback for unconfigured Supabase
-        const fallback: UserProfile = {
+        const fallback: UserProfile = localProfile || {
           id: userId,
           email: email,
           fullName: email.split('@')[0] || 'Evermore Member',
@@ -376,7 +443,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const setCurrentUser = async (profile: UserProfile, sub?: UserSubscription) => {
     setUser(profile);
+    setIsGuest(false);
     await AsyncStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify(profile));
+    await AsyncStorage.removeItem(LOCAL_GUEST_KEY);
     if (sub) {
       setSubscription(sub);
       await AsyncStorage.setItem(LOCAL_SUB_KEY, JSON.stringify(sub));
@@ -613,6 +682,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(updatedUser);
     await AsyncStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify(updatedUser));
 
+    // Also update offline users table if user is in it
+    try {
+      const rawUsers = await AsyncStorage.getItem(LOCAL_USERS_KEY);
+      if (rawUsers) {
+        const users = JSON.parse(rawUsers);
+        if (users[user.email.toLowerCase()]) {
+          users[user.email.toLowerCase()].profile = updatedUser;
+          await AsyncStorage.setItem(LOCAL_USERS_KEY, JSON.stringify(users));
+        }
+      }
+    } catch {}
+
     if (isSupabaseConfigured()) {
       try {
         await supabase
@@ -638,15 +719,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       completedAt,
     };
 
+    let currentProg = { ...lessonProgress };
+    try {
+      const rawProg = await AsyncStorage.getItem(LOCAL_PROGRESS_KEY);
+      if (rawProg) {
+        currentProg = { ...currentProg, ...JSON.parse(rawProg) };
+      }
+    } catch {}
+
+    const isFirstTime = !currentProg[lessonId]?.completed;
     const updatedMap = {
-      ...lessonProgress,
+      ...currentProg,
       [lessonId]: newProgress,
     };
+
     setLessonProgress(updatedMap);
     await AsyncStorage.setItem(LOCAL_PROGRESS_KEY, JSON.stringify(updatedMap));
 
     if (user) {
-      const isFirstTime = !lessonProgress[lessonId]?.completed;
       if (isFirstTime) {
         const updatedUser = {
           ...user,
@@ -654,6 +744,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         };
         setUser(updatedUser);
         await AsyncStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify(updatedUser));
+
+        // Update offline users table if exists
+        try {
+          const rawUsers = await AsyncStorage.getItem(LOCAL_USERS_KEY);
+          if (rawUsers) {
+            const users = JSON.parse(rawUsers);
+            if (users[user.email.toLowerCase()]) {
+              users[user.email.toLowerCase()].profile = updatedUser;
+              await AsyncStorage.setItem(LOCAL_USERS_KEY, JSON.stringify(users));
+            }
+          }
+        } catch {}
 
         if (isSupabaseConfigured()) {
           try {
