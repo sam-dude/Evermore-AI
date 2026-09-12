@@ -11,7 +11,7 @@ import {
   Linking,
   StyleSheet,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as WebBrowser from 'expo-web-browser';
 import { Lock, Mail, User as UserIcon, ArrowLeft, Check, Globe } from 'lucide-react-native';
 import { useAuth } from '@/context/auth-context';
@@ -24,6 +24,10 @@ interface AuthScreenProps {
 }
 
 export function AuthScreen({ initialMode = 'signup', onBackToOnboarding, onContinueAsGuest }: AuthScreenProps) {
+  const insets = useSafeAreaInsets();
+  const topPadding = Math.max(insets.top, Platform.OS === 'ios' ? 48 : 24);
+  const bottomPadding = Math.max(insets.bottom, 20);
+
   const { login, signup, continueAsGuest } = useAuth();
   const [isSignUp, setIsSignUp] = useState(initialMode === 'signup');
   const [fullName, setFullName] = useState('');
@@ -85,13 +89,17 @@ export function AuthScreen({ initialMode = 'signup', onBackToOnboarding, onConti
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#050B14]" edges={['top', 'bottom']}>
+    <View style={{ flex: 1, backgroundColor: '#050B14', paddingTop: topPadding }}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        className="flex-1"
+        style={{ flex: 1 }}
       >
         <ScrollView
-          contentContainerStyle={{ paddingHorizontal: 22, paddingVertical: 14 }}
+          contentContainerStyle={{
+            paddingHorizontal: 22,
+            paddingTop: 8,
+            paddingBottom: bottomPadding + 20,
+          }}
           showsVerticalScrollIndicator={false}
         >
           {/* ── TOP BAR (MATCHING BRAND HEADER) ── */}
@@ -338,6 +346,6 @@ export function AuthScreen({ initialMode = 'signup', onBackToOnboarding, onConti
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }
