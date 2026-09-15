@@ -4,13 +4,14 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  Platform,
-  Linking,
+  Image,
+  Dimensions,
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
+import Svg, { Defs, RadialGradient, Stop, Rect } from 'react-native-svg';
 import {
   Sparkles,
   BookOpen,
@@ -23,7 +24,9 @@ import {
 import { useAuth } from '@/context/auth-context';
 import { CheckinCard } from '@/components/checkin-card';
 import { LESSONS } from '@/data/lessons';
+import { Fonts } from '@/constants/theme';
 
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const TELEGRAM_URL = 'https://t.me/evermoreai?text=evermore';
 
 export default function DashboardScreen() {
@@ -70,222 +73,425 @@ export default function DashboardScreen() {
       await WebBrowser.openBrowserAsync(TELEGRAM_URL, {
         toolbarColor: '#050B14',
       });
-    } catch {
-      Linking.openURL(TELEGRAM_URL);
-    }
+    } catch {}
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-evermore-bg" edges={['top']}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 36 }}
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#050B14' }} edges={['top']}>
+      {/* ── AMBIENT CYBER/MINT TOP HERO GLOW ── */}
+      <Svg width={SCREEN_WIDTH} height={420} style={{ position: 'absolute', top: 0, left: 0 }}>
+        <Defs>
+          <RadialGradient id="iosTopMintGlow" cx="50%" cy="0%" rx="80%" ry="70%">
+            <Stop offset="0%" stopColor="#00E5FF" stopOpacity="0.22" />
+            <Stop offset="40%" stopColor="#00F5A0" stopOpacity="0.10" />
+            <Stop offset="100%" stopColor="#050B14" stopOpacity="0" />
+          </RadialGradient>
+        </Defs>
+        <Rect x="0" y="0" width="100%" height="100%" fill="url(#iosTopMintGlow)" />
+      </Svg>
+
+      {/* ── TOP APP BAR ── */}
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          paddingHorizontal: 20,
+          paddingTop: 8,
+          paddingBottom: 14,
+        }}
       >
-        {/* ── TOP BAR / USER GREETING ── */}
-        <View className="flex-row items-center justify-between pt-3 pb-3 mb-1">
-          <View className="flex-1 pr-2">
-            <Text className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest">
-              Welcome back,
-            </Text>
-            <Text className="text-2xl font-black text-white tracking-tight" numberOfLines={1}>
-              {user?.fullName || 'Evermore Member'}
+        {/* Left: Brand Logo & Title */}
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Image
+            source={require('../../../assets/images/evermore-logo-white.png')}
+            style={{ width: 34, height: 22, marginRight: 8 }}
+            resizeMode="contain"
+          />
+          <Text
+            style={{
+              fontFamily: Fonts.extraBold,
+              fontSize: 18,
+              color: '#FFFFFF',
+              letterSpacing: -0.3,
+            }}
+          >
+            Evermore
+          </Text>
+        </View>
+
+        {/* Right Actions: Points/Streak Badge, Notifications Bell, Avatar */}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+          {/* Points Pill */}
+          <View
+            style={{
+              backgroundColor: '#0D1527',
+              paddingHorizontal: 12,
+              paddingVertical: 7,
+              borderRadius: 20,
+              borderWidth: 1,
+              borderColor: 'rgba(255, 255, 255, 0.1)',
+              flexDirection: 'row',
+              alignItems: 'center',
+            }}
+          >
+            <Sparkles size={13} color="#00E5FF" style={{ marginRight: 4 }} />
+            <Text
+              style={{
+                fontFamily: Fonts.extraBold,
+                fontSize: 12,
+                color: '#00E5FF',
+              }}
+            >
+              {user?.points || 0} pts
             </Text>
           </View>
 
-          {/* Top Actions: Streak Badge & Points Pill */}
-          <View className="flex-row items-center" style={{ gap: 8 }}>
-            {/* Streak Pill */}
-            <View
-              className="flex-row items-center bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 rounded-full"
-              style={{
-                shadowColor: '#F59E0B',
-                shadowOffset: { width: 0, height: 0 },
-                shadowOpacity: 0.25,
-                shadowRadius: 6,
-              }}
-            >
-              <Flame size={13} color="#F59E0B" />
-              <Text className="text-[10px] font-black text-amber-400 uppercase ml-1.5">
-                {user?.streak || 0}D STREAK
-              </Text>
-            </View>
+          {/* Circular Bell Notification Icon Button */}
+          <TouchableOpacity
+            onPress={() => router.push('/notifications')}
+            activeOpacity={0.8}
+            style={{
+              width: 38,
+              height: 38,
+              borderRadius: 19,
+              backgroundColor: 'rgba(255, 255, 255, 0.08)',
+              borderWidth: 1,
+              borderColor: 'rgba(255, 255, 255, 0.12)',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Bell size={18} color="#FFFFFF" strokeWidth={2.2} />
+          </TouchableOpacity>
 
-            {/* Points Pill */}
-            <View
-              className="flex-row items-center bg-evermore-surface border border-evermore-border px-3 py-1.5 rounded-full"
+          {/* User Avatar with Green Ring */}
+          <View
+            style={{
+              width: 38,
+              height: 38,
+              borderRadius: 19,
+              borderWidth: 2,
+              borderColor: '#00F5A0',
+              overflow: 'hidden',
+              backgroundColor: '#0A1628',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Image
+              source={require('../../../assets/images/evertap-logo.jpeg')}
+              style={{ width: '100%', height: '100%' }}
+              resizeMode="cover"
+            />
+          </View>
+        </View>
+      </View>
+
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 40 }}
+      >
+        {/* ── HERO HEADER ── */}
+        <View style={{ paddingHorizontal: 20, paddingTop: 18, paddingBottom: 24 }}>
+          <Text
+            style={{
+              fontFamily: Fonts.extraBold,
+              fontSize: 34,
+              lineHeight: 40,
+              color: '#FFFFFF',
+              letterSpacing: -0.6,
+              marginBottom: 8,
+            }}
+          >
+            Train EverAI & Earn
+          </Text>
+
+          <Text
+            style={{
+              fontFamily: Fonts.regular,
+              fontSize: 15,
+              lineHeight: 22,
+              color: '#94A3B8',
+              marginBottom: 20,
+            }}
+          >
+            Complete daily AI training prompts and evaluations to generate rewards.
+          </Text>
+
+          {/* ── IMAGE 1 MODERN CARD: AI MONETIZATION ── */}
+          <View
+            style={{
+              backgroundColor: '#101726',
+              borderRadius: 24,
+              padding: 22,
+              borderWidth: 1,
+              borderColor: 'rgba(255, 255, 255, 0.07)',
+              shadowColor: '#000000',
+              shadowOffset: { width: 0, height: 8 },
+              shadowOpacity: 0.35,
+              shadowRadius: 20,
+            }}
+          >
+            <Text
               style={{
-                shadowColor: '#00E5FF',
-                shadowOffset: { width: 0, height: 0 },
-                shadowOpacity: 0.15,
-                shadowRadius: 8,
+                fontFamily: Fonts.bold,
+                fontSize: 11.5,
+                color: '#00F5A0',
+                letterSpacing: 1.2,
+                textTransform: 'uppercase',
+                marginBottom: 8,
               }}
             >
-              <Sparkles size={13} color="#00E5FF" />
-              <Text className="text-xs font-extrabold text-evermore-cyan ml-1.5">
-                {user?.points || 0} pts
+              AI MONETIZATION
+            </Text>
+
+            <Text
+              style={{
+                fontFamily: Fonts.extraBold,
+                fontSize: 24,
+                color: '#FFFFFF',
+                letterSpacing: -0.4,
+                marginBottom: 14,
+              }}
+            >
+              Train EverAI & Earn
+            </Text>
+
+            <Text
+              style={{
+                fontFamily: Fonts.regular,
+                fontSize: 15,
+                lineHeight: 22,
+                color: '#94A3B8',
+                marginBottom: 22,
+              }}
+            >
+              Master AI curriculum modules and maintain daily streaks to qualify for upcoming data evaluation tasks.
+            </Text>
+
+            <TouchableOpacity
+              onPress={() => router.push('/(tabs)/learn' as any)}
+              activeOpacity={0.88}
+              style={{
+                backgroundColor: '#00F5A0',
+                paddingVertical: 14,
+                paddingHorizontal: 22,
+                borderRadius: 20,
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                alignSelf: 'flex-start',
+                shadowColor: '#00F5A0',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.3,
+                shadowRadius: 10,
+              }}
+            >
+              <Text
+                style={{
+                  fontFamily: Fonts.extraBold,
+                  fontSize: 14.5,
+                  color: '#040914',
+                  letterSpacing: 0.2,
+                  marginRight: 6,
+                }}
+              >
+                Get Started
               </Text>
-            </View>
+              <ArrowRight size={16} color="#040914" strokeWidth={2.6} />
+            </TouchableOpacity>
           </View>
         </View>
 
         {/* Checkin Alert Banner */}
         {checkinAlert && (
-          <View
-            className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-3.5 mb-4"
-            style={{
-              shadowColor: '#50C878',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.15,
-              shadowRadius: 8,
-            }}
-          >
-            <Text className="text-xs text-emerald-300 font-semibold">{checkinAlert}</Text>
+          <View style={{ paddingHorizontal: 20, marginBottom: 16 }}>
+            <View
+              style={{
+                backgroundColor: 'rgba(80, 200, 120, 0.12)',
+                borderColor: 'rgba(80, 200, 120, 0.3)',
+                borderWidth: 1,
+                borderRadius: 16,
+                padding: 14,
+              }}
+            >
+              <Text style={{ fontFamily: Fonts.bold, fontSize: 13, color: '#50C878' }}>
+                {checkinAlert}
+              </Text>
+            </View>
           </View>
         )}
 
-        {/* ── JOIN THE COMMUNITY HERO CARD ── */}
-        <View
-          className="bg-evermore-surface border rounded-3xl p-5 mb-5"
-          style={{
-            borderColor: 'rgba(0, 229, 255, 0.35)',
-            shadowColor: '#00E5FF',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.15,
-            shadowRadius: 18,
-          }}
-        >
-          <View className="flex-row items-center mb-3">
-            <View
-              className="w-12 h-12 rounded-2xl bg-cyan-500/15 border border-cyan-500/30 items-center justify-center mr-3"
-              style={{
-                shadowColor: '#00E5FF',
-                shadowOffset: { width: 0, height: 0 },
-                shadowOpacity: 0.35,
-                shadowRadius: 10,
-              }}
-            >
-              <MessageCircle size={22} color="#00E5FF" strokeWidth={2.2} />
-            </View>
-            <View className="flex-1">
-              <Text className="text-[10px] font-black text-evermore-cyan uppercase tracking-wider">
-                Official Telegram Group
-              </Text>
-              <Text className="text-base font-black text-white">
-                Join the Community
-              </Text>
-            </View>
-          </View>
+        {/* ── DAILY CHECK-IN WIDGET ── */}
+        <View style={{ paddingHorizontal: 20, marginBottom: 20 }}>
+          <CheckinCard
+            streak={user?.streak || 0}
+            hasCheckedInToday={hasCheckedInToday}
+            onCheckIn={handleCheckIn}
+            loading={checkinLoading}
+          />
+        </View>
 
-          <Text className="text-xs text-slate-300 leading-relaxed mb-4">
-            Connect with fellow AI learners, share quiz insights, discuss new topics, and get real-time study updates directly in our Telegram group.
-          </Text>
-
-          <TouchableOpacity
-            onPress={handleOpenCommunity}
-            activeOpacity={0.85}
-            className="py-3.5 px-4 rounded-xl flex-row items-center justify-center"
+        {/* ── PROGRESS / CURRICULUM SECTION ── */}
+        <View style={{ paddingHorizontal: 20, marginBottom: 20 }}>
+          <View
             style={{
-              backgroundColor: '#00E5FF',
-              shadowColor: '#00E5FF',
-              shadowOffset: { width: 0, height: 3 },
-              shadowOpacity: 0.35,
-              shadowRadius: 10,
+              backgroundColor: '#0A182E',
+              borderWidth: 1,
+              borderColor: 'rgba(0, 229, 255, 0.25)',
+              borderRadius: 24,
+              padding: 20,
             }}
           >
-            <MessageCircle size={15} color="#050B14" strokeWidth={2.5} />
-            <Text className="text-xs font-black text-[#050B14] uppercase tracking-wider ml-2 mr-1">
-              Join Telegram Community
-            </Text>
-            <ExternalLink size={13} color="#050B14" />
-          </TouchableOpacity>
-        </View>
-
-        {/* ── DAILY CHECK-IN WIDGET ── */}
-        <CheckinCard
-          streak={user?.streak || 0}
-          hasCheckedInToday={hasCheckedInToday}
-          onCheckIn={handleCheckIn}
-          loading={checkinLoading}
-        />
-
-        {/* ── PROGRESS SECTION ── */}
-        <View
-          className="bg-evermore-surface border border-evermore-border rounded-3xl p-5 mb-5"
-          style={{
-            shadowColor: '#00E5FF',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.06,
-            shadowRadius: 16,
-          }}
-        >
-          <View className="flex-row items-center justify-between mb-3">
-            <View className="flex-row items-center">
-              <View className="w-11 h-11 rounded-2xl bg-evermore-cyan/10 border border-evermore-cyan/20 items-center justify-center mr-3">
-                <BookOpen size={20} color="#00E5FF" />
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View
+                  style={{
+                    width: 42,
+                    height: 42,
+                    borderRadius: 14,
+                    backgroundColor: 'rgba(0, 229, 255, 0.12)',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginRight: 12,
+                  }}
+                >
+                  <BookOpen size={20} color="#00E5FF" />
+                </View>
+                <View>
+                  <Text style={{ fontFamily: Fonts.bold, fontSize: 11, color: '#00E5FF', letterSpacing: 1, textTransform: 'uppercase' }}>
+                    CURRICULUM
+                  </Text>
+                  <Text style={{ fontFamily: Fonts.extraBold, fontSize: 16, color: '#FFFFFF' }}>
+                    {completedLessonsCount} of {totalLessons} Modules
+                  </Text>
+                </View>
               </View>
-              <View>
-                <Text className="text-[11px] font-bold text-evermore-cyan uppercase tracking-wider">
-                  Curriculum
-                </Text>
-                <Text className="text-base font-black text-white">
-                  {completedLessonsCount} of {totalLessons} Modules
-                </Text>
-              </View>
+
+              {user?.streak ? (
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    backgroundColor: 'rgba(245, 158, 11, 0.12)',
+                    paddingHorizontal: 10,
+                    paddingVertical: 5,
+                    borderRadius: 12,
+                    borderWidth: 1,
+                    borderColor: 'rgba(245, 158, 11, 0.3)',
+                  }}
+                >
+                  <Flame size={13} color="#F59E0B" style={{ marginRight: 4 }} />
+                  <Text style={{ fontFamily: Fonts.bold, fontSize: 11, color: '#F59E0B' }}>
+                    {user.streak}D Streak
+                  </Text>
+                </View>
+              ) : null}
             </View>
-          </View>
 
-          {/* Gradient Progress Bar */}
-          <View className="w-full bg-slate-800/80 h-2.5 rounded-full overflow-hidden mb-4">
+            {/* Progress Bar */}
             <View
-              className="h-full rounded-full"
               style={{
-                width: `${progressPercent}%`,
-                backgroundColor: '#00E5FF',
-                shadowColor: '#00E5FF',
-                shadowOffset: { width: 0, height: 0 },
-                shadowOpacity: 0.6,
-                shadowRadius: 6,
+                width: '100%',
+                backgroundColor: '#071324',
+                height: 8,
+                borderRadius: 4,
+                overflow: 'hidden',
+                marginBottom: 16,
               }}
-            />
-          </View>
+            >
+              <View
+                style={{
+                  width: `${progressPercent}%`,
+                  height: '100%',
+                  borderRadius: 4,
+                  backgroundColor: '#00F5A0',
+                }}
+              />
+            </View>
 
-          <TouchableOpacity
-            onPress={() => router.push('/(tabs)/learn' as any)}
-            activeOpacity={0.75}
-            className="bg-evermore-surfaceLight border border-evermore-border py-3.5 px-4 rounded-xl flex-row items-center justify-between"
-          >
-            <Text className="text-xs font-bold text-white">
-              {completedLessonsCount === totalLessons ? 'Review All Modules' : 'Continue Learning'}
-            </Text>
-            <ArrowRight size={14} color="#00E5FF" />
-          </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => router.push('/(tabs)/learn' as any)}
+              activeOpacity={0.8}
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.06)',
+                borderWidth: 1,
+                borderColor: 'rgba(255, 255, 255, 0.1)',
+                paddingVertical: 14,
+                paddingHorizontal: 16,
+                borderRadius: 16,
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
+              <Text style={{ fontFamily: Fonts.bold, fontSize: 13, color: '#FFFFFF' }}>
+                {completedLessonsCount === totalLessons ? 'Review All Modules' : 'Continue Learning'}
+              </Text>
+              <ArrowRight size={16} color="#00E5FF" />
+            </TouchableOpacity>
+          </View>
         </View>
 
-        {/* ── PLATFORM UPDATES ── */}
-        <View className="bg-evermore-surface border border-evermore-border rounded-3xl p-5 mb-5">
-          <View className="flex-row items-center mb-3.5">
-            <View className="w-9 h-9 rounded-xl bg-indigo-500/10 border border-indigo-500/20 items-center justify-center mr-2.5">
-              <Bell size={16} color="#818CF8" />
+        {/* ── TELEGRAM STUDY COMMUNITY CARD ── */}
+        <View style={{ paddingHorizontal: 20, marginBottom: 20 }}>
+          <View
+            style={{
+              backgroundColor: '#0A182E',
+              borderRadius: 24,
+              borderWidth: 1,
+              borderColor: 'rgba(0, 229, 255, 0.25)',
+              padding: 20,
+            }}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+              <View
+                style={{
+                  width: 42,
+                  height: 42,
+                  borderRadius: 14,
+                  backgroundColor: 'rgba(0, 229, 255, 0.14)',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginRight: 12,
+                }}
+              >
+                <MessageCircle size={20} color="#00E5FF" strokeWidth={2.2} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontFamily: Fonts.bold, fontSize: 11, color: '#00E5FF', letterSpacing: 0.8, textTransform: 'uppercase' }}>
+                  STUDY COMMUNITY
+                </Text>
+                <Text style={{ fontFamily: Fonts.extraBold, fontSize: 16, color: '#FFFFFF' }}>
+                  Join the Community
+                </Text>
+              </View>
             </View>
-            <Text className="text-sm font-bold text-white">Latest Updates</Text>
-          </View>
 
-          <View className="border-b border-slate-800/80 pb-3 mb-3">
-            <Text className="text-xs font-bold text-slate-200">
-              Interactive AI Learning Tracks
+            <Text style={{ fontFamily: Fonts.regular, fontSize: 13, lineHeight: 20, color: '#94A3B8', marginBottom: 16 }}>
+              Connect with fellow AI learners, share quiz insights, discuss new topics, and get real-time study updates in our Telegram group.
             </Text>
-            <Text className="text-xs text-slate-400 mt-0.5 leading-relaxed">
-              Explore 5 new curriculum modules with retention quizzes to build tech literacy.
-            </Text>
-          </View>
 
-          <View>
-            <Text className="text-xs font-bold text-slate-200">
-              Daily Streak Rewards
-            </Text>
-            <Text className="text-xs text-slate-400 mt-0.5 leading-relaxed">
-              Maintain your daily streak to earn recognition and priority access to upcoming opportunities.
-            </Text>
+            <TouchableOpacity
+              onPress={handleOpenCommunity}
+              activeOpacity={0.85}
+              style={{
+                backgroundColor: '#00E5FF',
+                paddingVertical: 13,
+                paddingHorizontal: 16,
+                borderRadius: 16,
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <MessageCircle size={15} color="#050B14" strokeWidth={2.5} style={{ marginRight: 6 }} />
+              <Text style={{ fontFamily: Fonts.extraBold, fontSize: 13, color: '#050B14', marginRight: 6 }}>
+                Join Telegram Community
+              </Text>
+              <ExternalLink size={13} color="#050B14" />
+            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>

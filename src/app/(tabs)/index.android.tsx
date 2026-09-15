@@ -49,20 +49,19 @@ export default function AndroidHomeScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#050B14' }} edges={['top']}>
-      {/* ── AMBIENT MINT/CYAN TOP HERO GLOW (MATCHING IMAGE 1) ── */}
-      <Svg width={SCREEN_WIDTH} height={520} style={{ position: 'absolute', top: 0, left: 0 }}>
+      {/* ── AMBIENT CYBER/MINT TOP HERO GLOW ── */}
+      <Svg width={SCREEN_WIDTH} height={420} style={{ position: 'absolute', top: 0, left: 0 }}>
         <Defs>
-          <RadialGradient id="topMintGlow" cx="50%" cy="0%" rx="90%" ry="75%">
-            <Stop offset="0%" stopColor="#D5F7E6" stopOpacity="0.95" />
-            <Stop offset="35%" stopColor="#C8F2E2" stopOpacity="0.8" />
-            <Stop offset="70%" stopColor="#3B8268" stopOpacity="0.3" />
+          <RadialGradient id="topMintGlow" cx="50%" cy="0%" rx="80%" ry="70%">
+            <Stop offset="0%" stopColor="#00E5FF" stopOpacity="0.22" />
+            <Stop offset="40%" stopColor="#00F5A0" stopOpacity="0.10" />
             <Stop offset="100%" stopColor="#050B14" stopOpacity="0" />
           </RadialGradient>
         </Defs>
         <Rect x="0" y="0" width="100%" height="100%" fill="url(#topMintGlow)" />
       </Svg>
 
-      {/* ── TOP APP BAR (IMAGE 1 SPEC: Logo, NGN badge, Bell, Profile Avatar) ── */}
+      {/* ── TOP APP BAR ── */}
       <View
         style={{
           flexDirection: 'row',
@@ -76,7 +75,7 @@ export default function AndroidHomeScreen() {
         {/* Left: Brand Logo & Title */}
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <Image
-            source={require('../../../assets/images/evermore-logo-color.png')}
+            source={require('../../../assets/images/evermore-logo-white.png')}
             style={{ width: 34, height: 22, marginRight: 8 }}
             resizeMode="contain"
           />
@@ -84,7 +83,7 @@ export default function AndroidHomeScreen() {
             style={{
               fontFamily: Fonts.extraBold,
               fontSize: 18,
-              color: '#0F1B2B',
+              color: '#FFFFFF',
               letterSpacing: -0.3,
             }}
           >
@@ -101,6 +100,8 @@ export default function AndroidHomeScreen() {
               paddingHorizontal: 14,
               paddingVertical: 7,
               borderRadius: 20,
+              borderWidth: 1,
+              borderColor: 'rgba(255, 255, 255, 0.1)',
               shadowColor: '#000000',
               shadowOffset: { width: 0, height: 2 },
               shadowOpacity: 0.15,
@@ -128,17 +129,14 @@ export default function AndroidHomeScreen() {
               width: 38,
               height: 38,
               borderRadius: 19,
-              backgroundColor: '#FFFFFF',
+              backgroundColor: 'rgba(255, 255, 255, 0.08)',
+              borderWidth: 1,
+              borderColor: 'rgba(255, 255, 255, 0.12)',
               alignItems: 'center',
               justifyContent: 'center',
-              shadowColor: '#000000',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.1,
-              shadowRadius: 5,
-              elevation: 2,
             }}
           >
-            <Bell size={18} color="#0F1B2B" strokeWidth={2.2} />
+            <Bell size={18} color="#FFFFFF" strokeWidth={2.2} />
           </TouchableOpacity>
 
           {/* Circular User Avatar with Green Ring (Display Only) */}
@@ -169,7 +167,7 @@ export default function AndroidHomeScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 110 }}
       >
-        {/* ── SECTION 1: HERO & AI MONETIZATION (IMAGE 1 EXACT REPLICATION) ── */}
+        {/* ── SECTION 1: HERO & AI MONETIZATION ── */}
         <View style={{ paddingHorizontal: 20, paddingTop: 18, paddingBottom: 24 }}>
           {/* Main Hero Headline */}
           <Text
@@ -177,7 +175,7 @@ export default function AndroidHomeScreen() {
               fontFamily: Fonts.extraBold,
               fontSize: 34,
               lineHeight: 40,
-              color: '#0F1B2B',
+              color: '#FFFFFF',
               letterSpacing: -0.6,
               marginBottom: 8,
             }}
@@ -191,7 +189,7 @@ export default function AndroidHomeScreen() {
               fontFamily: Fonts.regular,
               fontSize: 15,
               lineHeight: 22,
-              color: '#334155',
+              color: '#94A3B8',
               marginBottom: 20,
             }}
           >
