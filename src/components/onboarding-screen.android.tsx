@@ -8,25 +8,25 @@ import {
   FlatList,
   NativeSyntheticEvent,
   NativeScrollEvent,
-  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Svg, { Defs, RadialGradient, Stop, Circle as SvgCircle, Rect } from 'react-native-svg';
+import Svg, {
+  Defs,
+  RadialGradient,
+  Stop,
+  Circle as SvgCircle,
+  Rect,
+  Line,
+} from 'react-native-svg';
 import {
   Sparkles,
   Rocket,
-  Target,
-  ArrowRight,
   TrendingUp,
-  Brain,
-  ShieldCheck,
-  CheckCircle2,
-  Award,
-  Zap,
+  ArrowRight,
 } from 'lucide-react-native';
 import { Fonts } from '@/constants/theme';
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 interface OnboardingScreenProps {
   onFinish: () => void;
@@ -35,15 +35,45 @@ interface OnboardingScreenProps {
 
 interface SlideData {
   id: string;
+  watermark: string;
   tag: string;
   headline: string;
   body: string;
-  accentColor: string;
-  renderGraphic: () => React.ReactNode;
+  icon: 'sparkles' | 'rocket' | 'trend';
   buttonLabel: string;
 }
 
-export function OnboardingScreen({ onFinish, onLoginPress }: OnboardingScreenProps) {
+const SLIDES: SlideData[] = [
+  {
+    id: '1',
+    watermark: '01',
+    tag: 'EVERMORE',
+    headline: 'There Is More In You.',
+    body: 'Discover your potential, learn new skills, and become more of what you are capable of.',
+    icon: 'sparkles',
+    buttonLabel: 'Continue',
+  },
+  {
+    id: '2',
+    watermark: '02',
+    tag: 'EVERMORE',
+    headline: 'Turn Potential Into Possibility.',
+    body: 'Access opportunities, participate in technology and AI, develop your abilities, and create new ways to earn.',
+    icon: 'rocket',
+    buttonLabel: 'Continue',
+  },
+  {
+    id: '3',
+    watermark: '03',
+    tag: 'EVERMORE',
+    headline: 'Grow. Track. Achieve.',
+    body: 'Keep moving forward. Track your progress, build your capabilities, and achieve more with EverMore.',
+    icon: 'trend',
+    buttonLabel: 'Get Started',
+  },
+];
+
+export function OnboardingScreen({ onFinish }: OnboardingScreenProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef<FlatList>(null);
 
@@ -62,401 +92,192 @@ export function OnboardingScreen({ onFinish, onLoginPress }: OnboardingScreenPro
     }
   };
 
-  const SLIDES: SlideData[] = [
-    // ── SLIDE 1: DISCOVER YOUR POTENTIAL ──
-    {
-      id: '1',
-      tag: 'DISCOVER & LEARN',
-      headline: 'There Is More\nIn You.',
-      body: 'Master practical AI tools, build valuable skills, and unlock real capabilities in modern technology.',
-      accentColor: '#00F5A0',
-      buttonLabel: 'Continue',
-      renderGraphic: () => (
-        <View style={{ alignItems: 'center', justifyContent: 'center', width: '100%', height: 230 }}>
-          {/* Outer glow aura */}
-          <Svg width={240} height={240} style={{ position: 'absolute' }}>
-            <Defs>
-              <RadialGradient id="glow1" cx="50%" cy="50%" rx="50%" ry="50%">
-                <Stop offset="0%" stopColor="#00F5A0" stopOpacity="0.25" />
-                <Stop offset="60%" stopColor="#00E5FF" stopOpacity="0.08" />
-                <Stop offset="100%" stopColor="#040914" stopOpacity="0" />
-              </RadialGradient>
-            </Defs>
-            <SvgCircle cx="120" cy="120" r="120" fill="url(#glow1)" />
-          </Svg>
-
-          {/* Central Glass Showcase Card */}
-          <View
-            style={{
-              width: SCREEN_WIDTH - 64,
-              maxWidth: 320,
-              backgroundColor: 'rgba(10, 24, 46, 0.85)',
-              borderRadius: 24,
-              borderWidth: 1.5,
-              borderColor: 'rgba(0, 245, 160, 0.3)',
-              padding: 18,
-              shadowColor: '#00F5A0',
-              shadowOffset: { width: 0, height: 8 },
-              shadowOpacity: 0.25,
-              shadowRadius: 24,
-              elevation: 8,
-            }}
-          >
-            {/* Top Tag inside card */}
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-              <View
-                style={{
-                  backgroundColor: 'rgba(0, 245, 160, 0.15)',
-                  paddingHorizontal: 10,
-                  paddingVertical: 4,
-                  borderRadius: 10,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                }}
-              >
-                <Sparkles size={12} color="#00F5A0" style={{ marginRight: 5 }} />
-                <Text style={{ fontFamily: Fonts.bold, fontSize: 10, color: '#00F5A0', letterSpacing: 0.5 }}>
-                  EVERMORE ACADEMY
-                </Text>
-              </View>
-
-              <View
-                style={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                  paddingHorizontal: 8,
-                  paddingVertical: 3,
-                  borderRadius: 8,
-                }}
-              >
-                <Text style={{ fontFamily: Fonts.semiBold, fontSize: 10, color: '#94A3B8' }}>
-                  Interactive
-                </Text>
-              </View>
-            </View>
-
-            {/* Middle Feature Rows */}
-            <View style={{ gap: 10 }}>
-              <View
-                style={{
-                  backgroundColor: '#071529',
-                  borderRadius: 12,
-                  padding: 10,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  borderWidth: 1,
-                  borderColor: 'rgba(255, 255, 255, 0.04)',
-                }}
-              >
-                <View
-                  style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: 8,
-                    backgroundColor: 'rgba(0, 229, 255, 0.12)',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginRight: 10,
-                  }}
-                >
-                  <Brain size={16} color="#00E5FF" />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ fontFamily: Fonts.bold, fontSize: 12, color: '#FFFFFF' }}>
-                    AI Curriculum & Prompting
-                  </Text>
-                  <Text style={{ fontFamily: Fonts.regular, fontSize: 10, color: '#64748B' }}>
-                    Comprehensive interactive lessons
-                  </Text>
-                </View>
-              </View>
-
-              <View
-                style={{
-                  backgroundColor: '#071529',
-                  borderRadius: 12,
-                  padding: 10,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  borderWidth: 1,
-                  borderColor: 'rgba(255, 255, 255, 0.04)',
-                }}
-              >
-                <View
-                  style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: 8,
-                    backgroundColor: 'rgba(0, 245, 160, 0.12)',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginRight: 10,
-                  }}
-                >
-                  <Award size={16} color="#00F5A0" />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ fontFamily: Fonts.bold, fontSize: 12, color: '#FFFFFF' }}>
-                    Daily Check-in Streaks
-                  </Text>
-                  <Text style={{ fontFamily: Fonts.regular, fontSize: 10, color: '#64748B' }}>
-                    Earn EverPoints as you progress
-                  </Text>
-                </View>
-              </View>
-            </View>
-          </View>
-        </View>
-      ),
-    },
-
-    // ── SLIDE 2: TURN POTENTIAL INTO POSSIBILITY (EARNING ECOSYSTEM) ──
-    {
-      id: '2',
-      tag: 'OPPORTUNITY & EARNING',
-      headline: 'Turn Potential\nInto Possibility.',
-      body: 'Access genuine AI training campaigns, outsourced technology jobs, and build sustainable income streams.',
-      accentColor: '#00E5FF',
-      buttonLabel: 'Continue',
-      renderGraphic: () => (
-        <View style={{ alignItems: 'center', justifyContent: 'center', width: '100%', height: 230 }}>
-          {/* Outer glow aura */}
-          <Svg width={240} height={240} style={{ position: 'absolute' }}>
-            <Defs>
-              <RadialGradient id="glow2" cx="50%" cy="50%" rx="50%" ry="50%">
-                <Stop offset="0%" stopColor="#00E5FF" stopOpacity="0.28" />
-                <Stop offset="60%" stopColor="#00F5A0" stopOpacity="0.08" />
-                <Stop offset="100%" stopColor="#040914" stopOpacity="0" />
-              </RadialGradient>
-            </Defs>
-            <SvgCircle cx="120" cy="120" r="120" fill="url(#glow2)" />
-          </Svg>
-
-          {/* Central Glass Showcase Card */}
-          <View
-            style={{
-              width: SCREEN_WIDTH - 64,
-              maxWidth: 320,
-              backgroundColor: 'rgba(10, 24, 46, 0.85)',
-              borderRadius: 24,
-              borderWidth: 1.5,
-              borderColor: 'rgba(0, 229, 255, 0.3)',
-              padding: 18,
-              shadowColor: '#00E5FF',
-              shadowOffset: { width: 0, height: 8 },
-              shadowOpacity: 0.25,
-              shadowRadius: 24,
-              elevation: 8,
-            }}
-          >
-            {/* Top Live Badge */}
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-              <View
-                style={{
-                  backgroundColor: 'rgba(0, 229, 255, 0.15)',
-                  paddingHorizontal: 10,
-                  paddingVertical: 4,
-                  borderRadius: 10,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                }}
-              >
-                <View
-                  style={{
-                    width: 6,
-                    height: 6,
-                    borderRadius: 3,
-                    backgroundColor: '#00F5A0',
-                    marginRight: 6,
-                  }}
-                />
-                <Text style={{ fontFamily: Fonts.bold, fontSize: 10, color: '#00E5FF', letterSpacing: 0.5 }}>
-                  ACTIVE OPPORTUNITIES
-                </Text>
-              </View>
-
-              <Text style={{ fontFamily: Fonts.bold, fontSize: 11, color: '#00F5A0' }}>
-                Hourly Payouts
-              </Text>
-            </View>
-
-            {/* Stat Cards Side by Side */}
-            <View style={{ flexDirection: 'row', gap: 10 }}>
-              <View
-                style={{
-                  flex: 1,
-                  backgroundColor: '#071529',
-                  borderRadius: 14,
-                  padding: 12,
-                  borderWidth: 1,
-                  borderColor: 'rgba(0, 245, 160, 0.2)',
-                }}
-              >
-                <Text style={{ fontFamily: Fonts.bold, fontSize: 9.5, color: '#64748B', letterSpacing: 0.8, marginBottom: 4 }}>
-                  AI TRAINING
-                </Text>
-                <Text style={{ fontFamily: Fonts.extraBold, fontSize: 18, color: '#00F5A0' }}>
-                  $16.8<Text style={{ fontSize: 11, color: '#94A3B8' }}>/hr</Text>
-                </Text>
-                <Text style={{ fontFamily: Fonts.regular, fontSize: 9, color: '#94A3B8', marginTop: 2 }}>
-                  Daily Tasks
-                </Text>
-              </View>
-
-              <View
-                style={{
-                  flex: 1,
-                  backgroundColor: '#071529',
-                  borderRadius: 14,
-                  padding: 12,
-                  borderWidth: 1,
-                  borderColor: 'rgba(0, 229, 255, 0.2)',
-                }}
-              >
-                <Text style={{ fontFamily: Fonts.bold, fontSize: 9.5, color: '#64748B', letterSpacing: 0.8, marginBottom: 4 }}>
-                  AI JOBS
-                </Text>
-                <Text style={{ fontFamily: Fonts.extraBold, fontSize: 18, color: '#00E5FF' }}>
-                  $18.0<Text style={{ fontSize: 11, color: '#94A3B8' }}>/hr</Text>
-                </Text>
-                <Text style={{ fontFamily: Fonts.regular, fontSize: 9, color: '#94A3B8', marginTop: 2 }}>
-                  Priority Access
-                </Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      ),
-    },
-
-    // ── SLIDE 3: YOUR NEXT CHAPTER STARTS HERE ──
-    {
-      id: '3',
-      tag: 'YOUR NEXT CHAPTER',
-      headline: 'Start Your\nEverMore Journey.',
-      body: 'Join a vibrant ecosystem of creators, learners, and earners. Pick your plan and begin today.',
-      accentColor: '#00F5A0',
-      buttonLabel: 'Start Your EverMore Journey',
-      renderGraphic: () => (
-        <View style={{ alignItems: 'center', justifyContent: 'center', width: '100%', height: 230 }}>
-          {/* Outer glow aura */}
-          <Svg width={240} height={240} style={{ position: 'absolute' }}>
-            <Defs>
-              <RadialGradient id="glow3" cx="50%" cy="50%" rx="50%" ry="50%">
-                <Stop offset="0%" stopColor="#00F5A0" stopOpacity="0.3" />
-                <Stop offset="50%" stopColor="#00E5FF" stopOpacity="0.1" />
-                <Stop offset="100%" stopColor="#040914" stopOpacity="0" />
-              </RadialGradient>
-            </Defs>
-            <SvgCircle cx="120" cy="120" r="120" fill="url(#glow3)" />
-          </Svg>
-
-          {/* Central Glass Showcase Card */}
-          <View
-            style={{
-              width: SCREEN_WIDTH - 64,
-              maxWidth: 320,
-              backgroundColor: 'rgba(10, 24, 46, 0.85)',
-              borderRadius: 24,
-              borderWidth: 1.5,
-              borderColor: 'rgba(0, 245, 160, 0.35)',
-              padding: 18,
-              shadowColor: '#00F5A0',
-              shadowOffset: { width: 0, height: 8 },
-              shadowOpacity: 0.3,
-              shadowRadius: 24,
-              elevation: 8,
-            }}
-          >
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 14 }}>
-              <View
-                style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: 18,
-                  backgroundColor: 'rgba(0, 245, 160, 0.15)',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginRight: 10,
-                }}
-              >
-                <Rocket size={18} color="#00F5A0" />
-              </View>
-              <View>
-                <Text style={{ fontFamily: Fonts.extraBold, fontSize: 13, color: '#FFFFFF' }}>
-                  6 Months All-Access
-                </Text>
-                <Text style={{ fontFamily: Fonts.medium, fontSize: 10.5, color: '#00E5FF' }}>
-                  Verified Evermore Membership
-                </Text>
-              </View>
-            </View>
-
-            {/* Checklist */}
-            <View style={{ gap: 8 }}>
-              {['Unlimited EverAI Assistant', 'AI Training Tasks & Reviews', 'Exclusive Community & Mentorship'].map(
-                (item, idx) => (
-                  <View key={idx} style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <CheckCircle2 size={13} color="#00F5A0" style={{ marginRight: 8 }} />
-                    <Text style={{ fontFamily: Fonts.medium, fontSize: 11.5, color: '#CBD5E1' }}>
-                      {item}
-                    </Text>
-                  </View>
-                )
-              )}
-            </View>
-          </View>
-        </View>
-      ),
-    },
-  ];
+  const renderIcon = (iconType: 'sparkles' | 'rocket' | 'trend') => {
+    switch (iconType) {
+      case 'sparkles':
+        return <Sparkles size={40} color="#FFFFFF" />;
+      case 'rocket':
+        return <Rocket size={40} color="#FFFFFF" style={{ transform: [{ rotate: '45deg' }] }} />;
+      case 'trend':
+        return <TrendingUp size={40} color="#FFFFFF" strokeWidth={2.8} />;
+    }
+  };
 
   const renderSlide = ({ item }: { item: SlideData }) => (
-    <View style={{ width: SCREEN_WIDTH, flex: 1, paddingHorizontal: 24 }}>
-      <View style={{ flex: 1, justifyContent: 'center' }}>
-        {/* Dynamic Graphic Showcase */}
-        {item.renderGraphic()}
+    <View style={{ width: SCREEN_WIDTH, flex: 1, paddingHorizontal: 24, justifyContent: 'space-between' }}>
+      {/* Top spacing */}
+      <View style={{ height: 20 }} />
 
-        {/* Tag line */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', alignSelf: 'center', marginTop: 16, marginBottom: 10 }}>
-          <View style={{ width: 18, height: 2, backgroundColor: item.accentColor, borderRadius: 1, marginRight: 8 }} />
+      {/* ── RADAR HOLOGRAM CENTER GRAPHIC ── */}
+      <View
+        style={{
+          width: '100%',
+          height: 270,
+          alignItems: 'center',
+          justifyContent: 'center',
+          position: 'relative',
+        }}
+      >
+        {/* Background Large Faint Watermark Number */}
+        <Text
+          style={{
+            position: 'absolute',
+            fontSize: 130,
+            fontFamily: Fonts.extraBold,
+            color: 'rgba(255, 255, 255, 0.035)',
+            letterSpacing: -4,
+            userSelect: 'none',
+          }}
+        >
+          {item.watermark}
+        </Text>
+
+        {/* Radar Concentric Rings with Glow */}
+        <Svg width={270} height={270} style={{ position: 'absolute' }}>
+          <Defs>
+            <RadialGradient id={`glow-${item.id}`} cx="50%" cy="50%" rx="50%" ry="50%">
+              <Stop offset="0%" stopColor="#00E5FF" stopOpacity="0.25" />
+              <Stop offset="55%" stopColor="#0055AA" stopOpacity="0.08" />
+              <Stop offset="100%" stopColor="#061124" stopOpacity="0" />
+            </RadialGradient>
+          </Defs>
+          {/* Radial glow background */}
+          <SvgCircle cx="135" cy="135" r="130" fill={`url(#glow-${item.id})`} />
+          {/* Outer Ring */}
+          <SvgCircle
+            cx="135"
+            cy="135"
+            r="115"
+            stroke="rgba(35, 75, 135, 0.4)"
+            strokeWidth="1"
+            fill="none"
+          />
+          {/* Middle Ring */}
+          <SvgCircle
+            cx="135"
+            cy="135"
+            r="82"
+            stroke="rgba(45, 105, 175, 0.45)"
+            strokeWidth="1"
+            fill="none"
+          />
+        </Svg>
+
+        {/* Central Glowing Circle Platform */}
+        <View
+          style={{
+            width: 104,
+            height: 104,
+            borderRadius: 52,
+            backgroundColor: 'rgba(12, 48, 88, 0.65)',
+            borderWidth: 1.5,
+            borderColor: 'rgba(0, 229, 255, 0.55)',
+            alignItems: 'center',
+            justifyContent: 'center',
+            shadowColor: '#00E5FF',
+            shadowOffset: { width: 0, height: 0 },
+            shadowOpacity: 0.45,
+            shadowRadius: 18,
+            elevation: 8,
+          }}
+        >
+          {renderIcon(item.icon)}
+        </View>
+
+        {/* Floating Glowing Accent Dots */}
+        <View
+          style={{
+            position: 'absolute',
+            left: 48,
+            top: 48,
+            width: 7,
+            height: 7,
+            borderRadius: 3.5,
+            backgroundColor: '#00E5FF',
+            shadowColor: '#00E5FF',
+            shadowOffset: { width: 0, height: 0 },
+            shadowOpacity: 0.9,
+            shadowRadius: 8,
+            elevation: 4,
+          }}
+        />
+        <View
+          style={{
+            position: 'absolute',
+            left: 65,
+            bottom: 60,
+            width: 5,
+            height: 5,
+            borderRadius: 2.5,
+            backgroundColor: '#00E5FF',
+            opacity: 0.6,
+          }}
+        />
+        <View
+          style={{
+            position: 'absolute',
+            right: 58,
+            bottom: 52,
+            width: 8,
+            height: 8,
+            borderRadius: 4,
+            backgroundColor: '#00F5A0',
+            shadowColor: '#00F5A0',
+            shadowOffset: { width: 0, height: 0 },
+            shadowOpacity: 0.9,
+            shadowRadius: 10,
+            elevation: 5,
+          }}
+        />
+      </View>
+
+      {/* ── TEXT CONTENT ── */}
+      <View style={{ marginBottom: 24 }}>
+        {/* Neon Green Accent Line + EVERMORE */}
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 14 }}>
+          <View
+            style={{
+              width: 24,
+              height: 3,
+              backgroundColor: '#00F5A0',
+              borderRadius: 2,
+              marginRight: 10,
+            }}
+          />
           <Text
             style={{
               fontFamily: Fonts.bold,
-              fontSize: 11,
-              color: item.accentColor,
+              fontSize: 12,
+              color: '#00F5A0',
               letterSpacing: 2,
               textTransform: 'uppercase',
             }}
           >
             {item.tag}
           </Text>
-          <View style={{ width: 18, height: 2, backgroundColor: item.accentColor, borderRadius: 1, marginLeft: 8 }} />
         </View>
 
-        {/* Headline */}
+        {/* Title */}
         <Text
           style={{
             fontFamily: Fonts.extraBold,
-            fontSize: 32,
+            fontSize: 34,
+            lineHeight: 40,
             color: '#FFFFFF',
-            textAlign: 'center',
-            lineHeight: 38,
             letterSpacing: -0.6,
-            marginBottom: 12,
+            marginBottom: 14,
           }}
         >
           {item.headline}
         </Text>
 
-        {/* Body */}
+        {/* Body Description */}
         <Text
           style={{
             fontFamily: Fonts.regular,
-            fontSize: 14,
+            fontSize: 15,
+            lineHeight: 24,
             color: '#94A3B8',
-            textAlign: 'center',
-            lineHeight: 22,
-            paddingHorizontal: 12,
           }}
         >
           {item.body}
@@ -465,20 +286,45 @@ export function OnboardingScreen({ onFinish, onLoginPress }: OnboardingScreenPro
     </View>
   );
 
+  const progressPercent = ((currentIndex + 1) / SLIDES.length) * 100;
+
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#040914' }} edges={['top', 'bottom']}>
-      {/* Background Gradient */}
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#061124' }} edges={['top', 'bottom']}>
+      {/* Background Subtle Tech Grid */}
       <Svg width={SCREEN_WIDTH} height="100%" style={{ position: 'absolute' }}>
         <Defs>
-          <RadialGradient id="bgGlow" cx="50%" cy="25%" rx="60%" ry="45%">
-            <Stop offset="0%" stopColor="#0B1F38" stopOpacity="0.6" />
-            <Stop offset="100%" stopColor="#040914" stopOpacity="1" />
+          <RadialGradient id="screenBg" cx="50%" cy="30%" rx="70%" ry="50%">
+            <Stop offset="0%" stopColor="#0B1E38" stopOpacity="0.8" />
+            <Stop offset="100%" stopColor="#061124" stopOpacity="1" />
           </RadialGradient>
         </Defs>
-        <Rect x="0" y="0" width="100%" height="100%" fill="url(#bgGlow)" />
+        <Rect x="0" y="0" width="100%" height="100%" fill="url(#screenBg)" />
+        {/* Subtle grid lines */}
+        {[0.2, 0.4, 0.6, 0.8].map((ratio, idx) => (
+          <Line
+            key={`v-${idx}`}
+            x1={SCREEN_WIDTH * ratio}
+            y1={0}
+            x2={SCREEN_WIDTH * ratio}
+            y2="100%"
+            stroke="rgba(255, 255, 255, 0.02)"
+            strokeWidth="1"
+          />
+        ))}
+        {[0.15, 0.3, 0.45, 0.6, 0.75].map((ratio, idx) => (
+          <Line
+            key={`h-${idx}`}
+            x1={0}
+            y1={`${ratio * 100}%`}
+            x2={SCREEN_WIDTH}
+            y2={`${ratio * 100}%`}
+            stroke="rgba(255, 255, 255, 0.02)"
+            strokeWidth="1"
+          />
+        ))}
       </Svg>
 
-      {/* Top Bar */}
+      {/* ── TOP BAR ── */}
       <View
         style={{
           flexDirection: 'row',
@@ -489,61 +335,45 @@ export function OnboardingScreen({ onFinish, onLoginPress }: OnboardingScreenPro
           paddingBottom: 4,
         }}
       >
-        {/* Logo */}
+        {/* Evermore Infinity Logo + Lowercase Text */}
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <View
-            style={{
-              width: 32,
-              height: 32,
-              borderRadius: 10,
-              overflow: 'hidden',
-              marginRight: 8,
-              borderWidth: 1.5,
-              borderColor: 'rgba(0, 229, 255, 0.35)',
-              backgroundColor: '#0A1628',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Image
-              source={require('../../assets/images/evertap-logo.jpeg')}
-              style={{ width: '100%', height: '100%' }}
-              resizeMode="cover"
-            />
-          </View>
+          <Image
+            source={require('../../assets/images/evermore-logo-white.png')}
+            style={{ width: 34, height: 22, marginRight: 8 }}
+            resizeMode="contain"
+          />
           <Text
             style={{
               fontFamily: Fonts.extraBold,
-              fontSize: 14,
+              fontSize: 16,
               color: '#FFFFFF',
-              letterSpacing: 2,
-              textTransform: 'uppercase',
+              letterSpacing: 0.2,
             }}
           >
-            EVERMORE
+            evermore
           </Text>
         </View>
 
-        {/* Skip button */}
+        {/* Sleek Skip Pill Button */}
         <TouchableOpacity
           onPress={onFinish}
           activeOpacity={0.7}
           style={{
-            paddingHorizontal: 16,
+            paddingHorizontal: 18,
             paddingVertical: 7,
-            borderRadius: 18,
-            backgroundColor: 'rgba(255, 255, 255, 0.07)',
+            borderRadius: 20,
+            backgroundColor: 'rgba(255, 255, 255, 0.08)',
             borderWidth: 1,
             borderColor: 'rgba(255, 255, 255, 0.12)',
           }}
         >
-          <Text style={{ fontFamily: Fonts.bold, fontSize: 11.5, color: '#94A3B8' }}>
+          <Text style={{ fontFamily: Fonts.bold, fontSize: 12, color: '#E2E8F0' }}>
             Skip
           </Text>
         </TouchableOpacity>
       </View>
 
-      {/* Carousel */}
+      {/* ── CAROUSEL ── */}
       <FlatList
         ref={flatListRef}
         data={SLIDES}
@@ -558,40 +388,46 @@ export function OnboardingScreen({ onFinish, onLoginPress }: OnboardingScreenPro
         style={{ flex: 1 }}
       />
 
-      {/* Bottom Section */}
+      {/* ── BOTTOM NAVIGATION SECTION ── */}
       <View style={{ paddingHorizontal: 24, paddingBottom: 16 }}>
-        {/* Progress Dots + Counter */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
-          <View style={{ flexDirection: 'row', gap: 6 }}>
-            {SLIDES.map((_, i) => (
-              <View
-                key={i}
-                style={{
-                  width: i === currentIndex ? 32 : 8,
-                  height: 4,
-                  borderRadius: 2,
-                  backgroundColor: i === currentIndex ? '#00F5A0' : 'rgba(255, 255, 255, 0.18)',
-                }}
-              />
-            ))}
+        {/* Horizontal Progress Bar + Step Counter */}
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 18 }}>
+          <View
+            style={{
+              flex: 1,
+              height: 4,
+              borderRadius: 2,
+              backgroundColor: 'rgba(255, 255, 255, 0.12)',
+              marginRight: 14,
+              overflow: 'hidden',
+            }}
+          >
+            <View
+              style={{
+                width: `${progressPercent}%`,
+                height: '100%',
+                borderRadius: 2,
+                backgroundColor: '#00F5A0',
+              }}
+            />
           </View>
-          <Text style={{ fontFamily: Fonts.bold, fontSize: 11.5, color: '#64748B' }}>
-            {currentIndex + 1} / {SLIDES.length}
+          <Text style={{ fontFamily: Fonts.bold, fontSize: 12, color: '#64748B' }}>
+            {currentIndex + 1}/3
           </Text>
         </View>
 
-        {/* Continue / Start Button */}
+        {/* Vibrant Green Action Button */}
         <TouchableOpacity
           onPress={goToNext}
           activeOpacity={0.88}
           style={{
-            backgroundColor: '#00F5A0',
+            backgroundColor: '#00E599',
             paddingVertical: 16,
-            borderRadius: 18,
+            borderRadius: 28,
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'center',
-            shadowColor: '#00F5A0',
+            shadowColor: '#00E599',
             shadowOffset: { width: 0, height: 6 },
             shadowOpacity: 0.35,
             shadowRadius: 14,
@@ -601,27 +437,31 @@ export function OnboardingScreen({ onFinish, onLoginPress }: OnboardingScreenPro
           <Text
             style={{
               fontFamily: Fonts.extraBold,
-              fontSize: 15,
-              color: '#040914',
-              letterSpacing: 0.3,
+              fontSize: 16,
+              color: '#050B14',
+              letterSpacing: 0.2,
+              marginRight: 6,
             }}
           >
             {SLIDES[currentIndex].buttonLabel}
           </Text>
-          <ArrowRight size={18} color="#040914" strokeWidth={2.5} style={{ marginLeft: 6 }} />
+          <ArrowRight size={18} color="#050B14" strokeWidth={2.6} />
         </TouchableOpacity>
 
-        {/* Enter Platform Direct Link (No login on Android) */}
-        <TouchableOpacity
-          onPress={onFinish}
-          activeOpacity={0.7}
-          style={{ alignItems: 'center', paddingVertical: 14 }}
-        >
-          <Text style={{ fontFamily: Fonts.regular, fontSize: 12.5, color: '#64748B' }}>
-            Ready to discover?{' '}
-            <Text style={{ fontFamily: Fonts.bold, color: '#00E5FF' }}>Enter Platform →</Text>
-          </Text>
-        </TouchableOpacity>
+        {/* Slide 3 Link: "Learn more about EverMore" */}
+        {currentIndex === SLIDES.length - 1 ? (
+          <TouchableOpacity
+            onPress={onFinish}
+            activeOpacity={0.7}
+            style={{ paddingVertical: 14, alignItems: 'center' }}
+          >
+            <Text style={{ fontFamily: Fonts.semiBold, fontSize: 13, color: '#93C5FD' }}>
+              Learn more about EverMore
+            </Text>
+          </TouchableOpacity>
+        ) : (
+          <View style={{ height: 46 }} />
+        )}
       </View>
     </SafeAreaView>
   );

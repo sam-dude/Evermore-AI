@@ -10,18 +10,17 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import Svg, { Defs, RadialGradient, LinearGradient, Stop, Rect, Circle as SvgCircle } from 'react-native-svg';
+import Svg, { Defs, RadialGradient, Stop, Rect } from 'react-native-svg';
 import {
-  ChevronDown,
   ArrowRight,
   Send,
   Sparkles,
   Zap,
   Globe2,
-  TrendingUp,
   Brain,
-  ShieldCheck,
   CheckCircle2,
+  Bell,
+  ChevronDown,
 } from 'lucide-react-native';
 import { Fonts } from '@/constants/theme';
 
@@ -32,7 +31,7 @@ export default function AndroidHomeScreen() {
   const router = useRouter();
   const scrollViewRef = useRef<ScrollView>(null);
 
-  const handleJoinEverMore = () => {
+  const handleGetStarted = () => {
     router.push('/membership');
   };
 
@@ -40,56 +39,117 @@ export default function AndroidHomeScreen() {
     try {
       await Linking.openURL(TELEGRAM_SUPPORT_URL);
     } catch {
-      // Fallback url
       Linking.openURL('https://t.me/evermoreai');
     }
   };
 
   const scrollToFirstSection = () => {
-    scrollViewRef.current?.scrollTo({ y: 480, animated: true });
+    scrollViewRef.current?.scrollTo({ y: 520, animated: true });
   };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#050B14' }} edges={['top']}>
-      {/* Dynamic Background Glow */}
-      <Svg width={SCREEN_WIDTH} height="100%" style={{ position: 'absolute' }}>
+      {/* ── AMBIENT MINT/CYAN TOP HERO GLOW (MATCHING IMAGE 1) ── */}
+      <Svg width={SCREEN_WIDTH} height={520} style={{ position: 'absolute', top: 0, left: 0 }}>
         <Defs>
-          <RadialGradient id="homeGlow1" cx="20%" cy="10%" rx="60%" ry="40%">
-            <Stop offset="0%" stopColor="#0E355C" stopOpacity="0.45" />
-            <Stop offset="100%" stopColor="#050B14" stopOpacity="0" />
-          </RadialGradient>
-          <RadialGradient id="homeGlow2" cx="80%" cy="55%" rx="50%" ry="35%">
-            <Stop offset="0%" stopColor="#005748" stopOpacity="0.3" />
+          <RadialGradient id="topMintGlow" cx="50%" cy="0%" rx="90%" ry="75%">
+            <Stop offset="0%" stopColor="#D5F7E6" stopOpacity="0.95" />
+            <Stop offset="35%" stopColor="#C8F2E2" stopOpacity="0.8" />
+            <Stop offset="70%" stopColor="#3B8268" stopOpacity="0.3" />
             <Stop offset="100%" stopColor="#050B14" stopOpacity="0" />
           </RadialGradient>
         </Defs>
-        <Rect x="0" y="0" width="100%" height="100%" fill="url(#homeGlow1)" />
-        <Rect x="0" y="0" width="100%" height="100%" fill="url(#homeGlow2)" />
+        <Rect x="0" y="0" width="100%" height="100%" fill="url(#topMintGlow)" />
       </Svg>
 
-      {/* ── TOP APP BAR ── */}
+      {/* ── TOP APP BAR (IMAGE 1 SPEC: Logo, NGN badge, Bell, Profile Avatar) ── */}
       <View
         style={{
           flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'space-between',
           paddingHorizontal: 20,
-          paddingVertical: 12,
-          borderBottomWidth: 1,
-          borderBottomColor: 'rgba(30, 58, 95, 0.35)',
+          paddingTop: 8,
+          paddingBottom: 14,
         }}
       >
-        {/* Evermore Brand Logo */}
+        {/* Left: Brand Logo & Title */}
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Image
+            source={require('../../../assets/images/evermore-logo-color.png')}
+            style={{ width: 34, height: 22, marginRight: 8 }}
+            resizeMode="contain"
+          />
+          <Text
+            style={{
+              fontFamily: Fonts.extraBold,
+              fontSize: 18,
+              color: '#0F1B2B',
+              letterSpacing: -0.3,
+            }}
+          >
+            Evermore
+          </Text>
+        </View>
+
+        {/* Right Actions: NGN badge, Bell, Profile Avatar */}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+          {/* NGN Currency Pill */}
           <View
             style={{
-              width: 32,
-              height: 32,
-              borderRadius: 10,
+              backgroundColor: '#0D1527',
+              paddingHorizontal: 14,
+              paddingVertical: 7,
+              borderRadius: 20,
+              shadowColor: '#000000',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.15,
+              shadowRadius: 6,
+              elevation: 3,
+            }}
+          >
+            <Text
+              style={{
+                fontFamily: Fonts.extraBold,
+                fontSize: 12.5,
+                color: '#FFFFFF',
+                letterSpacing: 0.5,
+              }}
+            >
+              NGN
+            </Text>
+          </View>
+
+          {/* Circular Bell Notification Icon Button */}
+          <TouchableOpacity
+            onPress={() => router.push('/notifications')}
+            activeOpacity={0.8}
+            style={{
+              width: 38,
+              height: 38,
+              borderRadius: 19,
+              backgroundColor: '#FFFFFF',
+              alignItems: 'center',
+              justifyContent: 'center',
+              shadowColor: '#000000',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 5,
+              elevation: 2,
+            }}
+          >
+            <Bell size={18} color="#0F1B2B" strokeWidth={2.2} />
+          </TouchableOpacity>
+
+          {/* Circular User Avatar with Green Ring (Display Only) */}
+          <View
+            style={{
+              width: 38,
+              height: 38,
+              borderRadius: 19,
+              borderWidth: 2,
+              borderColor: '#00F5A0',
               overflow: 'hidden',
-              marginRight: 9,
-              borderWidth: 1.5,
-              borderColor: 'rgba(0, 229, 255, 0.4)',
               backgroundColor: '#0A1628',
               alignItems: 'center',
               justifyContent: 'center',
@@ -101,41 +161,7 @@ export default function AndroidHomeScreen() {
               resizeMode="cover"
             />
           </View>
-          <View>
-            <Text
-              style={{
-                fontFamily: Fonts.extraBold,
-                fontSize: 15,
-                color: '#FFFFFF',
-                letterSpacing: 1.5,
-                textTransform: 'uppercase',
-              }}
-            >
-              EVERMORE
-            </Text>
-          </View>
         </View>
-
-        {/* Support Top Pill */}
-        <TouchableOpacity
-          onPress={handleOpenTelegram}
-          activeOpacity={0.8}
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            backgroundColor: 'rgba(10, 30, 60, 0.85)',
-            paddingVertical: 6,
-            paddingHorizontal: 12,
-            borderRadius: 20,
-            borderWidth: 1,
-            borderColor: 'rgba(0, 229, 255, 0.35)',
-          }}
-        >
-          <Send size={13} color="#00E5FF" style={{ marginRight: 6 }} />
-          <Text style={{ fontFamily: Fonts.bold, fontSize: 11.5, color: '#00E5FF' }}>
-            Support
-          </Text>
-        </TouchableOpacity>
       </View>
 
       <ScrollView
@@ -143,97 +169,124 @@ export default function AndroidHomeScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 110 }}
       >
-        {/* ── SECTION 1: HERO SECTION ── */}
-        <View style={{ paddingHorizontal: 22, paddingTop: 28, paddingBottom: 24 }}>
-          {/* Welcome Tag */}
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 14 }}>
-            <View
-              style={{
-                width: 28,
-                height: 3,
-                backgroundColor: '#00F5A0',
-                borderRadius: 2,
-                marginRight: 10,
-              }}
-            />
-            <Text
-              style={{
-                fontFamily: Fonts.bold,
-                fontSize: 11,
-                color: '#00F5A0',
-                letterSpacing: 2,
-                textTransform: 'uppercase',
-              }}
-            >
-              WELCOME TO EVERMORE
-            </Text>
-          </View>
-
+        {/* ── SECTION 1: HERO & AI MONETIZATION (IMAGE 1 EXACT REPLICATION) ── */}
+        <View style={{ paddingHorizontal: 20, paddingTop: 18, paddingBottom: 24 }}>
           {/* Main Hero Headline */}
           <Text
             style={{
               fontFamily: Fonts.extraBold,
-              fontSize: 38,
-              lineHeight: 44,
-              color: '#FFFFFF',
-              letterSpacing: -0.8,
-              marginBottom: 16,
+              fontSize: 34,
+              lineHeight: 40,
+              color: '#0F1B2B',
+              letterSpacing: -0.6,
+              marginBottom: 8,
             }}
           >
-            Exist Beyond{'\n'}The Moment.
+            Train EverAI & Earn
           </Text>
 
-          {/* Subheading */}
-          <Text
-            style={{
-              fontFamily: Fonts.bold,
-              fontSize: 18,
-              color: '#38BDF8',
-              letterSpacing: -0.2,
-              marginBottom: 12,
-            }}
-          >
-            Learn. Grow. Participate. Earn.
-          </Text>
-
-          {/* Body Narrative */}
+          {/* Subtitle description */}
           <Text
             style={{
               fontFamily: Fonts.regular,
-              fontSize: 14.5,
-              lineHeight: 23,
-              color: '#94A3B8',
-              marginBottom: 26,
+              fontSize: 15,
+              lineHeight: 22,
+              color: '#334155',
+              marginBottom: 20,
             }}
           >
-            A technology and opportunity platform connecting people, skills, technology and real-world possibilities.
+            Complete daily AI training prompts and evaluations to generate rewards.
           </Text>
 
-          {/* Scroll to Discover Indicator */}
-          <TouchableOpacity
-            onPress={scrollToFirstSection}
-            activeOpacity={0.7}
-            style={{ flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start' }}
+          {/* ── IMAGE 1 MODERN CARD: AI MONETIZATION ── */}
+          <View
+            style={{
+              backgroundColor: '#101726',
+              borderRadius: 24,
+              padding: 22,
+              borderWidth: 1,
+              borderColor: 'rgba(255, 255, 255, 0.07)',
+              shadowColor: '#000000',
+              shadowOffset: { width: 0, height: 8 },
+              shadowOpacity: 0.35,
+              shadowRadius: 20,
+              elevation: 8,
+            }}
           >
-            <View
+            {/* Green Pill: AI MONETIZATION */}
+            <Text
               style={{
-                width: 36,
-                height: 36,
-                borderRadius: 18,
-                borderWidth: 1,
-                borderColor: 'rgba(255, 255, 255, 0.2)',
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginRight: 10,
+                fontFamily: Fonts.bold,
+                fontSize: 11.5,
+                color: '#00F5A0',
+                letterSpacing: 1.2,
+                textTransform: 'uppercase',
+                marginBottom: 8,
               }}
             >
-              <ChevronDown size={18} color="#94A3B8" />
-            </View>
-            <Text style={{ fontFamily: Fonts.medium, fontSize: 13, color: '#94A3B8' }}>
-              Scroll to discover
+              AI MONETIZATION
             </Text>
-          </TouchableOpacity>
+
+            {/* Card Headline */}
+            <Text
+              style={{
+                fontFamily: Fonts.extraBold,
+                fontSize: 24,
+                color: '#FFFFFF',
+                letterSpacing: -0.4,
+                marginBottom: 14,
+              }}
+            >
+              Train EverAI & Earn
+            </Text>
+
+            {/* Card Body */}
+            <Text
+              style={{
+                fontFamily: Fonts.regular,
+                fontSize: 15,
+                lineHeight: 22,
+                color: '#94A3B8',
+                marginBottom: 22,
+              }}
+            >
+              No active EverAI tasks are available for your current plan right now.
+            </Text>
+
+            {/* Action CTA Button: Get Started (Replacing "Coming soon") */}
+            <TouchableOpacity
+              onPress={handleGetStarted}
+              activeOpacity={0.88}
+              style={{
+                backgroundColor: '#00F5A0',
+                paddingVertical: 14,
+                paddingHorizontal: 22,
+                borderRadius: 20,
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                alignSelf: 'flex-start',
+                shadowColor: '#00F5A0',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.3,
+                shadowRadius: 10,
+                elevation: 5,
+              }}
+            >
+              <Text
+                style={{
+                  fontFamily: Fonts.extraBold,
+                  fontSize: 14.5,
+                  color: '#040914',
+                  letterSpacing: 0.2,
+                  marginRight: 6,
+                }}
+              >
+                Get Started
+              </Text>
+              <ArrowRight size={16} color="#040914" strokeWidth={2.6} />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* ── SECTION 2: THE ESSENCE SHOWCASE CARD ── */}
@@ -316,7 +369,7 @@ export default function AndroidHomeScreen() {
               {[
                 { icon: Brain, title: 'AI Mastery', desc: 'Practical prompt engineering & generative models' },
                 { icon: Zap, title: 'Real Monetization', desc: 'Hourly paid AI tasks and training campaigns' },
-                { icon: Globe2, title: 'Borderless Access', desc: 'Designed specifically for ambitious African talents' },
+                { icon: Globe2, title: 'Borderless Access', desc: 'Designed specifically for ambitious talents' },
               ].map((item, idx) => (
                 <View
                   key={idx}
@@ -396,21 +449,9 @@ export default function AndroidHomeScreen() {
             We create avenues for people to learn, develop skills, participate in AI, monetize their abilities, discover opportunities and earn rewards.
           </Text>
 
-          <Text
-            style={{
-              fontFamily: Fonts.regular,
-              fontSize: 14,
-              lineHeight: 23,
-              color: '#94A3B8',
-              marginBottom: 24,
-            }}
-          >
-            At the heart of EverMore is a simple belief: there is always more to learn, more to build and more to achieve.
-          </Text>
-
-          {/* Section CTA Button */}
+          {/* Section CTA Button: Get Started */}
           <TouchableOpacity
-            onPress={handleJoinEverMore}
+            onPress={handleGetStarted}
             activeOpacity={0.88}
             style={{
               backgroundColor: '#00F5A0',
@@ -421,6 +462,7 @@ export default function AndroidHomeScreen() {
               alignItems: 'center',
               justifyContent: 'center',
               alignSelf: 'flex-start',
+              marginTop: 10,
               shadowColor: '#00F5A0',
               shadowOffset: { width: 0, height: 6 },
               shadowOpacity: 0.35,
@@ -436,7 +478,7 @@ export default function AndroidHomeScreen() {
                 letterSpacing: 0.3,
               }}
             >
-              Join EverMore
+              Get Started
             </Text>
             <ArrowRight size={17} color="#040914" strokeWidth={2.8} style={{ marginLeft: 6 }} />
           </TouchableOpacity>
@@ -476,20 +518,26 @@ export default function AndroidHomeScreen() {
                 </Text>
               </View>
 
-              <View
+              {/* Replaced "Coming soon" with "Get Started" direct link */}
+              <TouchableOpacity
+                onPress={handleGetStarted}
+                activeOpacity={0.8}
                 style={{
-                  backgroundColor: 'rgba(245, 158, 11, 0.15)',
-                  paddingHorizontal: 8,
-                  paddingVertical: 3,
-                  borderRadius: 8,
+                  backgroundColor: 'rgba(0, 245, 160, 0.15)',
+                  paddingHorizontal: 10,
+                  paddingVertical: 4,
+                  borderRadius: 10,
                   borderWidth: 1,
-                  borderColor: 'rgba(245, 158, 11, 0.35)',
+                  borderColor: 'rgba(0, 245, 160, 0.35)',
+                  flexDirection: 'row',
+                  alignItems: 'center',
                 }}
               >
-                <Text style={{ fontFamily: Fonts.bold, fontSize: 10, color: '#F59E0B' }}>
-                  Coming soon
+                <Text style={{ fontFamily: Fonts.bold, fontSize: 10.5, color: '#00F5A0', marginRight: 4 }}>
+                  Get Started
                 </Text>
-              </View>
+                <ArrowRight size={12} color="#00F5A0" />
+              </TouchableOpacity>
             </View>
 
             {/* Title */}
@@ -625,19 +673,7 @@ export default function AndroidHomeScreen() {
               marginBottom: 14,
             }}
           >
-            EverMore is not limited to learning and AI.
-          </Text>
-
-          <Text
-            style={{
-              fontFamily: Fonts.regular,
-              fontSize: 14,
-              lineHeight: 23,
-              color: '#94A3B8',
-              marginBottom: 14,
-            }}
-          >
-            The platform also creates reward-driven experiences around the conversations and trends people care about.
+            EverMore is not limited to learning and AI. The platform also creates reward-driven experiences around the conversations and trends people care about.
           </Text>
 
           <Text
@@ -672,9 +708,9 @@ export default function AndroidHomeScreen() {
           gap: 12,
         }}
       >
-        {/* Primary CTA: Join EverMore -> */}
+        {/* Primary CTA: Get Started -> */}
         <TouchableOpacity
-          onPress={handleJoinEverMore}
+          onPress={handleGetStarted}
           activeOpacity={0.88}
           style={{
             flex: 1,
@@ -699,7 +735,7 @@ export default function AndroidHomeScreen() {
               letterSpacing: 0.3,
             }}
           >
-            Join EverMore
+            Get Started
           </Text>
           <ArrowRight size={17} color="#040914" strokeWidth={2.8} style={{ marginLeft: 6 }} />
         </TouchableOpacity>

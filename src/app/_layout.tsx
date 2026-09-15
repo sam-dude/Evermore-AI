@@ -107,6 +107,13 @@ function RootNavigator() {
             animation: 'slide_from_right',
           }}
         />
+        <Stack.Screen
+          name="notifications"
+          options={{
+            headerShown: false,
+            animation: 'slide_from_right',
+          }}
+        />
       </Stack>
     );
   }
@@ -126,6 +133,13 @@ function RootNavigator() {
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen
             name="lesson/[id]"
+            options={{
+              headerShown: false,
+              animation: 'slide_from_right',
+            }}
+          />
+          <Stack.Screen
+            name="notifications"
             options={{
               headerShown: false,
               animation: 'slide_from_right',
