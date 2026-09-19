@@ -166,28 +166,28 @@ export default function DashboardScreen() {
 
         {/* Right Actions: Points/Streak Badge, Notifications Bell, Avatar */}
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-          {/* Points Pill */}
+          {/* Compact Points Pill */}
           <View
             style={{
-              backgroundColor: '#0D1527',
-              paddingHorizontal: 12,
-              paddingVertical: 7,
-              borderRadius: 20,
+              backgroundColor: 'rgba(0, 229, 255, 0.08)',
+              paddingHorizontal: 8,
+              paddingVertical: 4,
+              borderRadius: 14,
               borderWidth: 1,
-              borderColor: 'rgba(255, 255, 255, 0.1)',
+              borderColor: 'rgba(0, 229, 255, 0.2)',
               flexDirection: 'row',
               alignItems: 'center',
             }}
           >
-            <Sparkles size={13} color="#00E5FF" style={{ marginRight: 4 }} />
+            <Sparkles size={11} color="#00E5FF" style={{ marginRight: 3 }} />
             <Text
               style={{
-                fontFamily: Fonts.extraBold,
-                fontSize: 12,
+                fontFamily: Fonts.bold,
+                fontSize: 11,
                 color: '#00E5FF',
               }}
             >
-              {user?.points || 0} pts
+              {user?.points || 0}
             </Text>
           </View>
 
