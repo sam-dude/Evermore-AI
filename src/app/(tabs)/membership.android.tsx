@@ -89,7 +89,7 @@ export default function AndroidMembershipScreen() {
 
   const handleProceedToTelegram = async () => {
     const text = encodeURIComponent(
-      `Hello Evermore Team! 👋\n\nI want to subscribe to the *${selectedPlan.name}* plan (${selectedPlan.price} - ${selectedPlan.duration}) on EverMore.\n\nPlease send me the payment instructions and my activation coupon code.`
+      `Hello Evermore Team! 👋\n\nI want to subscribe to the *${selectedPlan.name}* plan (${selectedPlan.price}) on EverMore.\n\nPlease send me the payment instructions and my activation coupon code.`
     );
     const url = `https://t.me/evermoreai?text=${text}`;
     try {

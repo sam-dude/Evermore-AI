@@ -7,6 +7,7 @@ import {
   Image,
   Dimensions,
   Alert,
+  Linking,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -76,6 +77,26 @@ export default function DashboardScreen() {
     } catch {}
   };
 
+  const handleGetStartedTelegram = async () => {
+    const userInfo =
+      user?.fullName || user?.email
+        ? ` (${user?.fullName || 'Member'}${user?.email ? ` - ${user.email}` : ''})`
+        : '';
+    const message = `Hello Evermore Team! 👋 I would like to get started with EverAI training and earn rewards${userInfo}.`;
+    const url = `https://t.me/evermoreai?text=${encodeURIComponent(message)}`;
+    try {
+      await Linking.openURL(url);
+    } catch {
+      try {
+        await WebBrowser.openBrowserAsync(url, {
+          toolbarColor: '#050B14',
+        });
+      } catch {
+        Linking.openURL('https://t.me/evermoreai').catch(() => {});
+      }
+    }
+  };
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#050B14' }} edges={['top']}>
       {/* ── AMBIENT CYBER/MINT TOP HERO GLOW ── */}
@@ -101,7 +122,7 @@ export default function DashboardScreen() {
           paddingBottom: 14,
         }}
       >
-        {/* Left: Brand Logo & Title */}
+        {/* Left: Brand Logo & Title & Starter Badge */}
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <Image
             source={require('../../../assets/images/evermore-logo-white.png')}
@@ -114,10 +135,33 @@ export default function DashboardScreen() {
               fontSize: 18,
               color: '#FFFFFF',
               letterSpacing: -0.3,
+              marginRight: 8,
             }}
           >
             Evermore
           </Text>
+          <View
+            style={{
+              backgroundColor: 'rgba(0, 245, 160, 0.12)',
+              borderColor: 'rgba(0, 245, 160, 0.35)',
+              borderWidth: 1,
+              borderRadius: 8,
+              paddingHorizontal: 7,
+              paddingVertical: 2,
+            }}
+          >
+            <Text
+              style={{
+                fontFamily: Fonts.bold,
+                fontSize: 10,
+                color: '#00F5A0',
+                letterSpacing: 0.5,
+                textTransform: 'uppercase',
+              }}
+            >
+              Starter
+            </Text>
+          </View>
         </View>
 
         {/* Right Actions: Points/Streak Badge, Notifications Bell, Avatar */}
@@ -219,59 +263,86 @@ export default function DashboardScreen() {
             Complete daily AI training prompts and evaluations to generate rewards.
           </Text>
 
-          {/* ── IMAGE 1 MODERN CARD: AI MONETIZATION ── */}
+          {/* ── MODERN COMMUNITY CARD: ACCESS & GET STARTED ── */}
           <View
             style={{
               backgroundColor: '#101726',
               borderRadius: 24,
               padding: 22,
               borderWidth: 1,
-              borderColor: 'rgba(255, 255, 255, 0.07)',
+              borderColor: 'rgba(0, 245, 160, 0.15)',
               shadowColor: '#000000',
               shadowOffset: { width: 0, height: 8 },
               shadowOpacity: 0.35,
               shadowRadius: 20,
             }}
           >
-            <Text
+            <View
               style={{
-                fontFamily: Fonts.bold,
-                fontSize: 11.5,
-                color: '#00F5A0',
-                letterSpacing: 1.2,
-                textTransform: 'uppercase',
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
                 marginBottom: 8,
               }}
             >
-              AI MONETIZATION
-            </Text>
+              <Text
+                style={{
+                  fontFamily: Fonts.bold,
+                  fontSize: 11.5,
+                  color: '#00F5A0',
+                  letterSpacing: 1.2,
+                  textTransform: 'uppercase',
+                }}
+              >
+                EXCLUSIVE COMMUNITY
+              </Text>
+              <View
+                style={{
+                  backgroundColor: 'rgba(0, 229, 255, 0.12)',
+                  borderRadius: 12,
+                  paddingHorizontal: 8,
+                  paddingVertical: 3,
+                }}
+              >
+                <Text
+                  style={{
+                    fontFamily: Fonts.bold,
+                    fontSize: 10,
+                    color: '#00E5FF',
+                    letterSpacing: 0.4,
+                  }}
+                >
+                  LIVE ACCESS
+                </Text>
+              </View>
+            </View>
 
             <Text
               style={{
                 fontFamily: Fonts.extraBold,
-                fontSize: 24,
+                fontSize: 23,
                 color: '#FFFFFF',
                 letterSpacing: -0.4,
-                marginBottom: 14,
+                marginBottom: 10,
               }}
             >
-              Train EverAI & Earn
+              Join Our Network & Train
             </Text>
 
             <Text
               style={{
                 fontFamily: Fonts.regular,
-                fontSize: 15,
+                fontSize: 14.5,
                 lineHeight: 22,
                 color: '#94A3B8',
-                marginBottom: 22,
+                marginBottom: 20,
               }}
             >
-              Master AI curriculum modules and maintain daily streaks to qualify for upcoming data evaluation tasks.
+              Tap Get Started to gain access to our active trader community, receive daily market updates, and connect directly with mentors on Telegram.
             </Text>
 
             <TouchableOpacity
-              onPress={() => router.push('/(tabs)/learn' as any)}
+              onPress={handleGetStartedTelegram}
               activeOpacity={0.88}
               style={{
                 backgroundColor: '#00F5A0',
