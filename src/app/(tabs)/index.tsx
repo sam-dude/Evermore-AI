@@ -294,7 +294,7 @@ export default function DashboardScreen() {
                   textTransform: 'uppercase',
                 }}
               >
-                EXCLUSIVE COMMUNITY
+                TRAIN AI
               </Text>
               <View
                 style={{
@@ -326,7 +326,7 @@ export default function DashboardScreen() {
                 marginBottom: 10,
               }}
             >
-              Join Our Network & Train
+              Train AI and Join
             </Text>
 
             <Text
@@ -338,7 +338,7 @@ export default function DashboardScreen() {
                 marginBottom: 20,
               }}
             >
-              Tap Get Started to gain access to our active trader community, receive daily market updates, and connect directly with mentors on Telegram.
+              You are currently on a guest starter account. Tap Get Started to gain full access, activate live AI training, and connect directly with mentors on Telegram.
             </Text>
 
             <TouchableOpacity
